@@ -14,6 +14,7 @@ import java.util.List;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.core.HostEntity;
 import org.cloudbus.cloudsim.lists.HostList;
 import org.cloudbus.cloudsim.lists.PeList;
 import org.fog.utils.GeoCoverage;
@@ -33,7 +34,7 @@ public class FogDeviceCharacteristics extends DatacenterCharacteristics{
 	private String os;
 
 	/** The host list. */
-	private List<? extends Host> hostList;
+	private List<? extends HostEntity> hostList;
 
 	/** The time zone -- difference from GMT. */
 	private double timeZone;
@@ -74,28 +75,6 @@ public class FogDeviceCharacteristics extends DatacenterCharacteristics{
 	/** The cost per bw. */
 	private double costPerBw;
 
-	/**
-	 * 
-	 * @param architecture the architecture of a resource
-	 * @param os the operating system used
-	 * @param vmm the virtual machine monitor used
-	 * @param hostList list of machines in a resource
-	 * @param timeZone local time zone of a user that owns this reservation. Time zone should be of
-	 *            range [GMT-12 ... GMT+13]
-	 * @param costPerSec the cost per sec to use this resource
-	 * @param costPerMem the cost to use memory in this resource
-	 * @param costPerStorage the cost to use storage in this resource
-	 * @param costPerBw the cost per bw
-	 * @pre architecture != null
-	 * @pre OS != null
-	 * @pre VMM != null
-	 * @pre machineList != null
-	 * @pre timeZone >= -12 && timeZone <= 13
-	 * @pre costPerSec >= 0.0
-	 * @pre costPerMem >= 0
-	 * @pre costPerStorage >= 0
-	 * @post $none
-	 */
 	@SuppressWarnings("serial")
 	public FogDeviceCharacteristics(
 			String architecture,
@@ -223,7 +202,7 @@ public class FogDeviceCharacteristics extends DatacenterCharacteristics{
 			// But different machines in a Cluster can have different rating
 			case FogDeviceCharacteristics.SPACE_SHARED:
 			case FogDeviceCharacteristics.OTHER_POLICY_DIFFERENT_RATING:
-				for (Host host : getHostList()) {
+				for (HostEntity host : getHostList()) {
 					mips += host.getTotalMips();
 				}
 				break;
@@ -336,7 +315,7 @@ public class FogDeviceCharacteristics extends DatacenterCharacteristics{
 	 */
 	public int getNumberOfFailedHosts() {
 		int numberOfFailedHosts = 0;
-		for (Host host : getHostList()) {
+		for (HostEntity host : getHostList()) {
 			if (host.isFailed()) {
 				numberOfFailedHosts++;
 			}
@@ -488,7 +467,7 @@ public class FogDeviceCharacteristics extends DatacenterCharacteristics{
 	 * @return the host list
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Host> List<T> getHostList() {
+	public <T extends HostEntity> List<T> getHostList() {
 		return (List<T>) hostList;
 	}
 
@@ -498,7 +477,7 @@ public class FogDeviceCharacteristics extends DatacenterCharacteristics{
 	 * @param <T> the generic type
 	 * @param hostList the new host list
 	 */
-	protected <T extends Host> void setHostList(List<T> hostList) {
+	protected <T extends HostEntity> void setHostList(List<T> hostList) {
 		this.hostList = hostList;
 	}
 

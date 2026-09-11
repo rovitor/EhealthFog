@@ -12,10 +12,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * The Log class used for performing loggin of the simulation process. It provides the ability to
+ * Logger used for performing logging of the simulation process. It provides the ability to
  * substitute the output stream by any OutputStream subclass.
  * 
  * @author Anton Beloglazov
+ * @author Remo Andreoli
  * @since CloudSim Toolkit 2.0
  */
 public class Log {
@@ -23,14 +24,18 @@ public class Log {
 	/** The Constant LINE_SEPARATOR. */
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	/** The output. */
+	/** The stream where the log will the outputted. */
 	private static OutputStream output;
 
-	/** The disable output flag. */
+	/** Indicates if the logger is disabled or not. If set to true,
+         the call for any print method has no effect. */
 	private static boolean disabled;
+	
+	/** Buffer to avoid creating new string builder upon every print. */
+	private static final StringBuilder buffer = new StringBuilder();
 
 	/**
-	 * Prints the message.
+	 * Prints a message.
 	 * 
 	 * @param message the message
 	 */
@@ -56,36 +61,81 @@ public class Log {
 	}
 
 	/**
-	 * Prints the line.
+	 * Prints a message and a new line.
 	 * 
 	 * @param message the message
 	 */
-	public static void printLine(String message) {
+	public static void println(String message) {
 		if (!isDisabled()) {
 			print(message + LINE_SEPARATOR);
 		}
 	}
 
+	@Deprecated
+	public static void printLine(String message) { println(message); }
+
 	/**
-	 * Prints the empty line.
+	 * Prints an empty line.
 	 */
-	public static void printLine() {
+	public static void println() {
 		if (!isDisabled()) {
 			print(LINE_SEPARATOR);
 		}
 	}
 
+	@Deprecated
+	public static void printLine() { println(); }
+
+
 	/**
-	 * Prints the line passed as a non-String object.
+	 * Prints the concatenated text representation of the arguments.
 	 * 
-	 * @param message the message
+	 * @param messages the messages to print
 	 */
-	public static void printLine(Object message) {
+	public static void printConcat(Object... messages) {
 		if (!isDisabled()) {
-			printLine(String.valueOf(message));
+			buffer.setLength(0); // Clear the buffer		    
+            for (Object message : messages) {
+                buffer.append(message);
+            }
+			print(buffer);
+		}
+	}
+	
+	/**
+	 * Prints the concatenated text representation of the arguments and a new line.
+	 * 
+	 * @param messages the messages to print
+	 */
+	public static void printlnConcat(Object... messages) {
+		if (!isDisabled()) {
+			buffer.setLength(0); // Clear the buffer		    
+            for (Object message : messages) {
+                buffer.append(message);
+            }
+			println(buffer);
 		}
 	}
 
+	@Deprecated
+	public static void printConcatLine(Object... messages) { printlnConcat(messages);}
+	
+	
+	/**
+	 * Prints the message passed as a non-String object and a new line.
+	 * 
+	 * @param message the message
+	 */
+	public static void println(Object message) {
+	    if (!isDisabled()) {
+		println(String.valueOf(message));
+	    }
+	}
+
+	@Deprecated
+	public static void printLine(Object message) { println(message); }
+	
+	
 	/**
 	 * Prints a string formated as in String.format().
 	 * 
@@ -99,19 +149,19 @@ public class Log {
 	}
 
 	/**
-	 * Prints a line formated as in String.format().
+	 * Prints a string formated as in String.format(), followed by a new line.
 	 * 
 	 * @param format the format
 	 * @param args the args
 	 */
 	public static void formatLine(String format, Object... args) {
 		if (!isDisabled()) {
-			printLine(String.format(format, args));
+			println(String.format(format, args));
 		}
 	}
 
 	/**
-	 * Sets the output.
+	 * Sets the output stream.
 	 * 
 	 * @param _output the new output
 	 */
@@ -120,7 +170,7 @@ public class Log {
 	}
 
 	/**
-	 * Gets the output.
+	 * Gets the output stream.
 	 * 
 	 * @return the output
 	 */

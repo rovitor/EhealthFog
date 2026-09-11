@@ -11,7 +11,7 @@ package org.cloudbus.cloudsim.sdn;
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
-import org.cloudbus.cloudsim.core.CloudSimTags;
+import org.cloudbus.cloudsim.core.CloudActionTags;
 
 /**
  * Middlebox represent specific VM that acts as a middle box
@@ -50,7 +50,7 @@ public abstract class Middlebox {
 		Cloudlet cl = new Cloudlet(id++,mipsPerOp,1,0,0,new UtilizationModelFull(),new UtilizationModelFull(),new UtilizationModelFull());
 		cl.setVmId(vm.getId());
 		
-		host.schedule(host.getHost().getDatacenter().getId(), 0.0, CloudSimTags.CLOUDLET_SUBMIT, cl);
+		host.schedule(host.getHost().getDatacenter().getId(), 0.0, CloudActionTags.CLOUDLET_SUBMIT, cl);
 	}
 
 }

@@ -8,57 +8,44 @@
 
 package org.cloudbus.cloudsim.distributions;
 
-import java.util.Random;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 
 /**
- * An exponential number generator.
+ * A pseudo random number generator following the 
+ * <a href="https://en.wikipedia.org/wiki/Exponential_distribution">Exponential distribution</a>.
  * 
  * @author Marcos Dias de Assuncao
  * @since CloudSim Toolkit 1.0
  */
 public class ExponentialDistr implements ContinuousDistribution {
 
-	/** The num gen. */
-	private final Random numGen;
+	/** The internal exponential number generator. */
+	private final ExponentialDistribution numGen;
 
-	/** The mean. */
-	private final double mean;
 
 	/**
-	 * Creates a new exponential number generator.
+	 * Creates a new exponential pseudo random number generator.
 	 * 
 	 * @param seed the seed to be used.
 	 * @param mean the mean for the distribution.
 	 */
 	public ExponentialDistr(long seed, double mean) {
-		if (mean <= 0.0) {
-			throw new IllegalArgumentException("Mean must be greater than 0.0");
-		}
-		numGen = new Random(seed);
-		this.mean = mean;
+		this(mean);
+		numGen.reseedRandomGenerator(seed);
 	}
 
 	/**
-	 * Creates a new exponential number generator.
+	 * Creates a new exponential pseudo random number generator.
 	 * 
 	 * @param mean the mean for the distribution.
 	 */
 	public ExponentialDistr(double mean) {
-		if (mean <= 0.0) {
-			throw new IllegalArgumentException("Mean must be greated than 0.0");
-		}
-		numGen = new Random(System.currentTimeMillis());
-		this.mean = mean;
+		numGen = new ExponentialDistribution(mean);
 	}
 
-	/**
-	 * Generate a new random number.
-	 * 
-	 * @return the next random number in the sequence
-	 */
 	@Override
 	public double sample() {
-		return -mean * Math.log(numGen.nextDouble());
+		return numGen.sample();
 	}
 
 }

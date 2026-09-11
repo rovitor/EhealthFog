@@ -154,8 +154,10 @@ public class MobilityController extends SimEntity{
 			printMigrationDelayDetails();
 			System.exit(0);
 			break;
-			
-		}
+
+            default:
+                throw new IllegalStateException("Unexpected value: " + ev.getTag());
+        }
 	}
 	
 	private void printMigrationDelayDetails() {

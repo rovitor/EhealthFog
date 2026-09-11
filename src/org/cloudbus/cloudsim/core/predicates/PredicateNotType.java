@@ -8,6 +8,7 @@
 
 package org.cloudbus.cloudsim.core.predicates;
 
+import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 
 /**
@@ -20,16 +21,16 @@ import org.cloudbus.cloudsim.core.SimEvent;
  */
 public class PredicateNotType extends Predicate {
 
-	/** The tags. */
-	private final int[] tags;
+	/** Array of tags to verify if the tag of received events doesn't correspond to. */
+	private final CloudSimTags[] tags;
 
 	/**
 	 * Constructor used to select events whose tags do not match a given tag.
 	 * 
 	 * @param tag An event tag value
 	 */
-	public PredicateNotType(int tag) {
-		tags = new int[] { tag };
+	public PredicateNotType(CloudSimTags tag) {
+		tags = new CloudSimTags[] { tag };
 	}
 
 	/**
@@ -37,20 +38,21 @@ public class PredicateNotType extends Predicate {
 	 * 
 	 * @param tags the list of tags
 	 */
-	public PredicateNotType(int[] tags) {
+	public PredicateNotType(CloudSimTags[] tags) {
 		this.tags = tags.clone();
 	}
 
 	/**
-	 * The match function called by {@link Simulation}, not used directly by the user.
+	 * Matches any event that hasn't one of the specified {@link #tags}.
 	 * 
-	 * @param ev the ev
-	 * @return true, if match
+	 * @param ev {@inheritDoc}
+	 * @return {@inheritDoc}
+         * @see #tags
 	 */
 	@Override
 	public boolean match(SimEvent ev) {
-		int tag = ev.getTag();
-		for (int tag2 : tags) {
+		CloudSimTags tag = ev.getTag();
+		for (CloudSimTags tag2 : tags) {
 			if (tag == tag2) {
 				return false;
 			}

@@ -111,7 +111,7 @@ public class Link {
 		double totalRequested = getRequestedBandwidthForDedicatedChannels(from);
 		
 		if(totalRequested > this.getBw()) {
-			Log.printLine("Link.getDedicatedChannelAdjustFactor() Exceeds link bandwidth. Reduce requested bandwidth");
+			Log.println("Link.getDedicatedChannelAdjustFactor() Exceeds link bandwidth. Reduce requested bandwidth");
 			factor = this.getBw() / totalRequested;
 		}
 		return factor;

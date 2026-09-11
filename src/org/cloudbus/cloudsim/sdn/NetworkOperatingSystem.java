@@ -26,10 +26,7 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmScheduler;
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.CloudSimTags;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.core.*;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 import org.cloudbus.cloudsim.provisioners.BwProvisioner;
 import org.cloudbus.cloudsim.provisioners.BwProvisionerSimple;
@@ -37,8 +34,8 @@ import org.cloudbus.cloudsim.provisioners.PeProvisionerSimple;
 import org.cloudbus.cloudsim.provisioners.RamProvisioner;
 import org.cloudbus.cloudsim.provisioners.RamProvisionerSimple;
 import org.cloudbus.cloudsim.sdn.example.policies.VmSchedulerTimeSharedEnergy;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONValue;
 
 /**
@@ -127,16 +124,16 @@ public abstract class NetworkOperatingSystem extends SimEntity {
 	
 	@Override
 	public void processEvent(SimEvent ev) {
-		int tag = ev.getTag();
+		CloudSimTags tag = ev.getTag();
 		
 		switch(tag){
 			case Constants.SDN_INTERNAL_PACKAGE_PROCESS: 
 				internalPackageProcess(); 
 				break;
-			case CloudSimTags.VM_CREATE_ACK:
+			case CloudActionTags.VM_CREATE_ACK:
 				processVmCreateAck(ev);
 				break;
-			case CloudSimTags.VM_DESTROY:
+			case CloudActionTags.VM_DESTROY:
 				processVmDestroyAck(ev);
 				break;
 			default: System.out.println("Unknown event received by "+super.getName()+". Tag:"+ev.getTag());
@@ -416,7 +413,7 @@ public abstract class NetworkOperatingSystem extends SimEntity {
 		}
 		return null;
 	}
-	protected SDNHost findSDNHost(Host host) {
+	protected SDNHost findSDNHost(HostEntity host) {
 		for(SDNHost sdnhost:sdnhosts) {
 			if(sdnhost.getHost().equals(host)) {
 				return sdnhost;
@@ -445,7 +442,7 @@ public abstract class NetworkOperatingSystem extends SimEntity {
 			return -1;
 		}
 		
-		Host host = vm.getHost();
+		HostEntity host = vm.getHost();
 		SDNHost sdnhost = findSDNHost(host);
 		if(sdnhost == null) {
 			Log.printLine(CloudSim.clock() + ": " + getName() + ": Cannot find SDN Host with vmId = "+ vmId);

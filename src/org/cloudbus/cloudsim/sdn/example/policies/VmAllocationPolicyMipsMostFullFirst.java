@@ -12,6 +12,8 @@ import java.util.List;
 
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.core.GuestEntity;
+import org.cloudbus.cloudsim.core.HostEntity;
 
 /**
  * VM Allocation Policy - Only compute power, MFF.
@@ -36,7 +38,7 @@ public class VmAllocationPolicyMipsMostFullFirst extends VmAllocationPolicyCombi
 	 * @post $none
 	 */
 	@Override
-	public boolean allocateHostForVm(Vm vm) {
+	public boolean allocateHostForGuest(GuestEntity vm) {
 		if (getVmTable().containsKey(vm.getUid())) { // if this vm was not created
 			return false;
 		}
@@ -69,7 +71,7 @@ public class VmAllocationPolicyMipsMostFullFirst extends VmAllocationPolicyCombi
 				}
 			}
 			freeResources[idx] = Double.POSITIVE_INFINITY;
-			Host host = getHostList().get(idx);
+			HostEntity host = getHostList().get(idx);
 			
 			// Check whether the host can hold this VM or not.
 			if(getFreeMips().get(idx) < requiredMips ||
@@ -79,7 +81,7 @@ public class VmAllocationPolicyMipsMostFullFirst extends VmAllocationPolicyCombi
 				continue;
 			}
 			
-			result = host.vmCreate(vm);
+			result = host.guestCreate(vm);
 
 			if (result) { // if vm were succesfully created in the host
 				getVmTable().put(vm.getUid(), host);

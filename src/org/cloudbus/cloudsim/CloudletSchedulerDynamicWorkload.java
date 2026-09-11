@@ -13,78 +13,87 @@ import java.util.List;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.fog.entities.Tuple;
 
 /**
  * CloudletSchedulerDynamicWorkload implements a policy of scheduling performed by a virtual machine
- * assuming that there is just one cloudlet which is working as an online service.
+ * to run its {@link Cloudlet Cloudlets}, 
+ * assuming there is just one cloudlet which is working as an online service.
+ * It extends a TimeShared policy, but in fact, considering that there is just
+ * one cloudlet for the VM using this scheduler, the cloudlet will not
+ * compete for CPU with other ones.
+ * Each VM has to have its own instance of a CloudletScheduler.
  * 
  * @author Anton Beloglazov
+ * @author Remo Andreoli
  * @since CloudSim Toolkit 2.0
+ * CloudletSchedulerSingleService as its Test Suite
  */
+//@TODO The name of the class doesn't represent its goal. A clearer name would be
 public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShared {
 
-	/** The mips. */
+	/** The individual MIPS capacity of each PE allocated to the VM using the scheduler,
+         * considering that all PEs have the same capacity. 
+         * //@TODO Despite of the class considers that all PEs have the same capacity,
+         * it accepts a list of PEs with different MIPS at the method 
+         * {@link CloudletScheduler#updateCloudletsProcessing(double, List) }
+         */
 	private double mips;
 
-	/** The number of PEs. */
+	/** The number of PEs allocated to the VM using the scheduler. */
 	private int numberOfPes;
 
-	/** The total mips. */
+	/** The total MIPS considering all PEs. */
 	private double totalMips;
 
-	/** The under allocated mips. */
+	/** The under allocated MIPS. */
 	private Map<String, Double> underAllocatedMips;
 
-	/** The cache previous time. */
+	/** The cache of the previous time when the {@link #getCurrentRequestedMips()} was called. */
 	private double cachePreviousTime;
 
-	/** The cache current requested mips. */
+	/** The cache of the last current requested MIPS. 
+         * @see  #getCurrentRequestedMips() 
+         */
 	private List<Double> cacheCurrentRequestedMips;
 
 	/**
-	 * Instantiates a new vM scheduler time shared.
+	 * Instantiates a new VM scheduler
 	 * 
-	 * @param mips the mips
-	 * @param numberOfPes the pes number
+	 * @param mips The individual MIPS capacity of each PE allocated to the VM using the scheduler,
+         * considering that all PEs have the same capacity.
+	 * @param numberOfPes The number of PEs allocated to the VM using the scheduler.
 	 */
 	public CloudletSchedulerDynamicWorkload(double mips, int numberOfPes) {
 		super();
 		setMips(mips);
 		setNumberOfPes(numberOfPes);
+                /*//@TODO There shouldn't be a setter to total mips, considering
+                that it is computed from number of PEs and mips.
+                If the number of pes of mips is set any time after here,
+                the total mips will be wrong. Just the getTotalMips is enough,
+                and it have to compute there the total, instead of storing into an attribute.*/
 		setTotalMips(getNumberOfPes() * getMips());
-		setUnderAllocatedMips(new HashMap<String, Double>());
+		setUnderAllocatedMips(new HashMap<>());
 		setCachePreviousTime(-1);
 	}
 
-	/**
-	 * Updates the processing of cloudlets running under management of this scheduler.
-	 * 
-	 * @param currentTime current simulation time
-	 * @param mipsShare array with MIPS share of each Pe available to the scheduler
-	 * @return time predicted completion time of the earliest finishing cloudlet, or 0 if there is
-	 *         no next events
-	 * @pre currentTime >= 0
-	 * @post $none
-	 */
 	@Override
-	public double updateVmProcessing(double currentTime, List<Double> mipsShare) {
+	public double updateCloudletsProcessing(double currentTime, List<Double> mipsShare) {
 		setCurrentMipsShare(mipsShare);
 
 		double timeSpan = currentTime - getPreviousTime();
 		double nextEvent = Double.MAX_VALUE;
-		List<ResCloudlet> cloudletsToFinish = new ArrayList<ResCloudlet>();
+		List<Cloudlet> cloudletsToFinish = new ArrayList<>();
 
-		for (ResCloudlet rcl : getCloudletExecList()) {
-			rcl.updateCloudletFinishedSoFar((long) (timeSpan
-					* getTotalCurrentAllocatedMipsForCloudlet(rcl, getPreviousTime()) * Consts.MILLION));
-			
-			if (rcl.getRemainingCloudletLength() == 0) { // finished: remove from the list
-				System.out.println("Tuple "+((Tuple)rcl.getCloudlet()).getActualTupleId()+" is finished at time "+CloudSim.clock());
-				cloudletsToFinish.add(rcl);
-				continue;
+		for (Cloudlet cl : getCloudletExecList()) {
+			cl.updateCloudletFinishedSoFar((long) (timeSpan *
+					getTotalCurrentAllocatedMipsForCloudlet(cl, getPreviousTime()) * Consts.MILLION));
+			cl.updateCloudlet(null);
+
+			if (cl.getRemainingCloudletLength() == 0) { // finished: remove from the list
+				cloudletsToFinish.add(cl);
 			} else { // not finish: estimate the finish time
-				double estimatedFinishTime = getEstimatedFinishTime(rcl, currentTime);
+				double estimatedFinishTime = getEstimatedFinishTime(cl, currentTime);
 				if (estimatedFinishTime - currentTime < CloudSim.getMinTimeBetweenEvents()) {
 					estimatedFinishTime = currentTime + CloudSim.getMinTimeBetweenEvents();
 				}
@@ -94,9 +103,9 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 			}
 		}
 
-		for (ResCloudlet rgl : cloudletsToFinish) {
-			getCloudletExecList().remove(rgl);
-			cloudletFinish(rgl);
+		for (Cloudlet cl : cloudletsToFinish) {
+			getCloudletExecList().remove(cl);
+			cloudletFinish(cl);
 		}
 
 		setPreviousTime(currentTime);
@@ -108,85 +117,25 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 		return nextEvent;
 	}
 
-	/**
-	 * Receives an cloudlet to be executed in the VM managed by this scheduler.
-	 * 
-	 * @param cl the cl
-	 * @return predicted completion time
-	 * @pre _gl != null
-	 * @post $none
-	 */
-	@Override
-	public double cloudletSubmit(Cloudlet cl) {
-		return cloudletSubmit(cl, 0);
-	}
-
-	/**
-	 * Receives an cloudlet to be executed in the VM managed by this scheduler.
-	 * 
-	 * @param cl the cl
-	 * @param fileTransferTime the file transfer time
-	 * @return predicted completion time
-	 * @pre _gl != null
-	 * @post $none
-	 */
 	@Override
 	public double cloudletSubmit(Cloudlet cl, double fileTransferTime) {
-		ResCloudlet rcl = new ResCloudlet(cl);
-		rcl.setCloudletStatus(Cloudlet.INEXEC);
+		cl.updateStatus(Cloudlet.CloudletStatus.INEXEC);
 
-		for (int i = 0; i < cl.getNumberOfPes(); i++) {
-			rcl.setMachineAndPeId(0, i);
-		}
-
-		getCloudletExecList().add(rcl);
-		return getEstimatedFinishTime(rcl, getPreviousTime());
+		getCloudletExecList().add(cl);
+		return getEstimatedFinishTime(cl, getPreviousTime());
 	}
 
-	/**
-	 * Processes a finished cloudlet.
-	 * 
-	 * @param rcl finished cloudlet
-	 * @pre rgl != $null
-	 * @post $none
-	 */
-	@Override
-	public void cloudletFinish(ResCloudlet rcl) {
-		rcl.setCloudletStatus(Cloudlet.SUCCESS);
-		rcl.finalizeCloudlet();
-		getCloudletFinishedList().add(rcl);
-	}
 
-	/**
-	 * Get utilization created by all cloudlets.
-	 * 
-	 * @param time the time
-	 * @return total utilization
-	 */
-	@Override
-	public double getTotalUtilizationOfCpu(double time) {
-		double totalUtilization = 0;
-		for (ResCloudlet rcl : getCloudletExecList()) {
-			totalUtilization += rcl.getCloudlet().getUtilizationOfCpu(time);
-		}
-		return totalUtilization;
-	}
 
-	/**
-	 * Gets the current mips.
-	 * 
-	 * @return the current mips
-	 */
 	@Override
 	public List<Double> getCurrentRequestedMips() {
-		
 		if (getCachePreviousTime() == getPreviousTime()) {
 			return getCacheCurrentRequestedMips();
 		}
-
-		List<Double> currentMips = new ArrayList<Double>();
+		List<Double> currentMips = new ArrayList<>();
 		double totalMips = getTotalUtilizationOfCpu(getPreviousTime()) * getTotalMips();
 		double mipsForPe = totalMips / getNumberOfPes();
+
 		for (int i = 0; i < getNumberOfPes(); i++) {
 			currentMips.add(mipsForPe);
 		}
@@ -197,30 +146,25 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 		return currentMips;
 	}
 
-	/**
-	 * Gets the current mips.
-	 * 
-	 * @param rcl the rcl
-	 * @param time the time
-	 * @return the current mips
-	 */
 	@Override
-	public double getTotalCurrentRequestedMipsForCloudlet(ResCloudlet rcl, double time) {
-		return rcl.getCloudlet().getUtilizationOfCpu(time) * getTotalMips();
+	public double getCurrentRequestedTotalMips() {
+		List<Double> currentMips = getCurrentRequestedMips();
+		double mips = 0.0;
+		for (double v : currentMips)
+			mips += v;
+		return mips;
 	}
 
-	/**
-	 * Gets the total current mips for the clouddlet.
-	 * 
-	 * @param rcl the rcl
-	 * @param mipsShare the mips share
-	 * @return the total current mips
-	 */
 	@Override
-	public double getTotalCurrentAvailableMipsForCloudlet(ResCloudlet rcl, List<Double> mipsShare) {
+	public double getTotalCurrentRequestedMipsForCloudlet(Cloudlet cl, double time) {
+		return cl.getUtilizationOfCpu(time) * getTotalMips();
+	}
+
+	@Override
+	public double getTotalCurrentAvailableMipsForCloudlet(Cloudlet cl, List<Double> mipsShare) {
 		double totalCurrentMips = 0.0;
 		if (mipsShare != null) {
-			int neededPEs = rcl.getNumberOfPes();
+			int neededPEs = cl.getNumberOfPes();
 			for (double mips : mipsShare) {
 				totalCurrentMips += mips;
 				neededPEs--;
@@ -232,55 +176,49 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 		return totalCurrentMips;
 	}
 
-	/**
-	 * Gets the current mips.
-	 * 
-	 * @param rcl the rcl
-	 * @param time the time
-	 * @return the current mips
-	 */
 	@Override
-	public double getTotalCurrentAllocatedMipsForCloudlet(ResCloudlet rcl, double time) {
-		double totalCurrentRequestedMips = getTotalCurrentRequestedMipsForCloudlet(rcl, time);
-		double totalCurrentAvailableMips = getTotalCurrentAvailableMipsForCloudlet(rcl, getCurrentMipsShare());
-		if (totalCurrentRequestedMips > totalCurrentAvailableMips) {
-			return totalCurrentAvailableMips;
-		}
-		return totalCurrentRequestedMips;
+	public double getTotalCurrentAllocatedMipsForCloudlet(Cloudlet cl, double time) {
+		double totalCurrentRequestedMips = getTotalCurrentRequestedMipsForCloudlet(cl, time);
+		double totalCurrentAvailableMips = getTotalCurrentAvailableMipsForCloudlet(cl, getCurrentMipsShare());
+		return Math.min(totalCurrentRequestedMips, totalCurrentAvailableMips);
 	}
 
 	/**
 	 * Update under allocated mips for cloudlet.
 	 * 
-	 * @param rcl the rgl
+	 * @param cl the cloudlet
 	 * @param mips the mips
+         * //@TODO It is not clear the goal of this method. The related test case
+         * doesn't make it clear too. The method doesn't appear to be used anywhere.
 	 */
-	public void updateUnderAllocatedMipsForCloudlet(ResCloudlet rcl, double mips) {
-		if (getUnderAllocatedMips().containsKey(rcl.getUid())) {
-			mips += getUnderAllocatedMips().get(rcl.getUid());
+	public void updateUnderAllocatedMipsForCloudlet(Cloudlet cl, double mips) {
+		if (getUnderAllocatedMips().containsKey(cl.getUid())) {
+			mips += getUnderAllocatedMips().get(cl.getUid());
 		}
-		getUnderAllocatedMips().put(rcl.getUid(), mips);
+		getUnderAllocatedMips().put(cl.getUid(), mips);
 	}
 
 	/**
-	 * Get estimated cloudlet completion time.
+	 * Get the estimated completion time of a given cloudlet.
 	 * 
-	 * @param rcl the rcl
+	 * @param cl the cloudlet
 	 * @param time the time
 	 * @return the estimated finish time
 	 */
-	public double getEstimatedFinishTime(ResCloudlet rcl, double time) {
+	@Override
+	public double getEstimatedFinishTime(Cloudlet cl, double time) {
 		return time
-				+ ((rcl.getRemainingCloudletLength()) / getTotalCurrentAllocatedMipsForCloudlet(rcl, time));
+				+ ((cl.getRemainingCloudletLength()) / getTotalCurrentAllocatedMipsForCloudlet(cl, time));
 	}
 
 	/**
-	 * Gets the total current mips.
+	 * Gets the total current mips available for the VM using the scheduler.
+         * The total is computed from the {@link #getCurrentMipsShare()}
 	 * 
 	 * @return the total current mips
 	 */
-	public int getTotalCurrentMips() {
-		int totalCurrentMips = 0;
+	public double getTotalCurrentMips() {
+		double totalCurrentMips = 0;
 		for (double mips : getCurrentMipsShare()) {
 			totalCurrentMips += mips;
 		}
@@ -360,7 +298,7 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 	}
 
 	/**
-	 * Gets the cache previous time.
+	 * Gets the cache of previous time.
 	 * 
 	 * @return the cache previous time
 	 */
@@ -369,7 +307,7 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 	}
 
 	/**
-	 * Sets the cache previous time.
+	 * Sets the cache of previous time.
 	 * 
 	 * @param cachePreviousTime the new cache previous time
 	 */
@@ -378,7 +316,7 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 	}
 
 	/**
-	 * Gets the cache current requested mips.
+	 * Gets the cache of current requested mips.
 	 * 
 	 * @return the cache current requested mips
 	 */
@@ -387,7 +325,7 @@ public class CloudletSchedulerDynamicWorkload extends CloudletSchedulerTimeShare
 	}
 
 	/**
-	 * Sets the cache current requested mips.
+	 * Sets the cache of current requested mips.
 	 * 
 	 * @param cacheCurrentRequestedMips the new cache current requested mips
 	 */

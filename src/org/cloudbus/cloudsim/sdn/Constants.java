@@ -15,14 +15,18 @@ package org.cloudbus.cloudsim.sdn;
  * @author Rodrigo N. Calheiros
  * @since CloudSimSDN 1.0
  */
-public class Constants {
+
+import org.cloudbus.cloudsim.Datacenter;
+import org.cloudbus.cloudsim.core.CloudSimTags;
+
+public enum Constants implements CloudSimTags {
 	
-	private static final int SDN_BASE = 89000000;
+	SDN_BASE,
 	
-	public static final int SDN_PACKAGE = SDN_BASE + 1;
-	public static final int SDN_INTERNAL_PACKAGE_PROCESS = SDN_BASE + 2; 
-	public static final int REQUEST_SUBMIT = SDN_BASE + 10;
-	public static final int REQUEST_COMPLETED = SDN_BASE + 11;
-	public static final int APPLICATION_SUBMIT = SDN_BASE + 20;	// Broker -> Datacenter.
-	public static final int APPLICATION_SUBMIT_ACK = SDN_BASE + 21;
+	SDN_PACKAGE,
+	SDN_INTERNAL_PACKAGE_PROCESS,
+	REQUEST_SUBMIT,
+	REQUEST_COMPLETED,
+	APPLICATION_SUBMIT,	// Broker -> Datacenter.
+	APPLICATION_SUBMIT_ACK
 }

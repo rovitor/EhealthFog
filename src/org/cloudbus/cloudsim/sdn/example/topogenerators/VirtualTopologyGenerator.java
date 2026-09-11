@@ -88,7 +88,7 @@ public class VirtualTopologyGenerator {
 			obj.put("size", vm.size);
 			obj.put("pes", vm.pe);
 			obj.put("mips", vm.mips);
-			obj.put("ram", new Integer(vm.ram));
+			obj.put("ram", Integer.valueOf(vm.ram));
 			obj.put("bw", vm.bw);
 			if(vm.starttime != -1)
 				obj.put("starttime", vm.starttime);

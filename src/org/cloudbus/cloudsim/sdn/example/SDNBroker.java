@@ -14,10 +14,7 @@ import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.CloudSimTags;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.core.*;
 import org.cloudbus.cloudsim.sdn.Constants;
 import org.cloudbus.cloudsim.sdn.SDNDatacenter;
 
@@ -66,10 +63,10 @@ public class SDNBroker extends SimEntity {
 
 	@Override
 	public void processEvent(SimEvent ev) {
-		int tag = ev.getTag();
+		CloudSimTags tag = ev.getTag();
 		
 		switch(tag){
-			case CloudSimTags.VM_CREATE_ACK: 	processVmCreate(ev);			break;
+			case CloudActionTags.VM_CREATE_ACK: 	processVmCreate(ev);			break;
 			case Constants.APPLICATION_SUBMIT_ACK: 		applicationSubmitCompleted(ev); break;
 			case Constants.REQUEST_COMPLETED:	requestCompleted(ev); break;
 			default: System.out.println("Unknown event received by "+super.getName()+". Tag:"+ev.getTag());

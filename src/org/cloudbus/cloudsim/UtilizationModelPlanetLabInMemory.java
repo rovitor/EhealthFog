@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- * The Class UtilizationModelPlanetLab.
+ * Defines the resource utilization model based on 
+ * a <a href="https://www.planet-lab.org">PlanetLab</a>
+ * datacenter trace file.
  */
 public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 	
@@ -16,9 +18,10 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 	private final double[] data; 
 	
 	/**
-	 * Instantiates a new utilization model PlanetLab.
+	 * Instantiates a new PlanetLab resource utilization model from a trace file.
 	 * 
-	 * @param inputPath the input path
+	 * @param inputPath The path of a PlanetLab datacenter trace.
+         * @param schedulingInterval
 	 * @throws NumberFormatException the number format exception
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
@@ -30,16 +33,17 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		BufferedReader input = new BufferedReader(new FileReader(inputPath));
 		int n = data.length;
 		for (int i = 0; i < n - 1; i++) {
-			data[i] = Integer.valueOf(input.readLine()) / 100.0;
+			data[i] = Integer.parseInt(input.readLine()) / 100.0;
 		}
 		data[n - 1] = data[n - 2];
 		input.close();
 	}
 	
 	/**
-	 * Instantiates a new utilization model PlanetLab with variable data samples.
+	 * Instantiates a new PlanetLab resource utilization model with variable data samples
+         * from a trace file.
 	 * 
-	 * @param inputPath the input path
+	 * @param inputPath The path of a PlanetLab datacenter trace.
 	 * @param dataSamples number of samples in the file
 	 * @throws NumberFormatException the number format exception
 	 * @throws IOException Signals that an I/O exception has occurred.
@@ -52,16 +56,12 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		BufferedReader input = new BufferedReader(new FileReader(inputPath));
 		int n = data.length;
 		for (int i = 0; i < n - 1; i++) {
-			data[i] = Integer.valueOf(input.readLine()) / 100.0;
+			data[i] = Integer.parseInt(input.readLine()) / 100.0;
 		}
 		data[n - 1] = data[n - 2];
 		input.close();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.power.UtilizationModel#getUtilization(double)
-	 */
 	@Override
 	public double getUtilization(double time) {
 		if (time % getSchedulingInterval() == 0) {
@@ -72,8 +72,7 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 		double utilization1 = data[time1];
 		double utilization2 = data[time2];
 		double delta = (utilization2 - utilization1) / ((time2 - time1) * getSchedulingInterval());
-		double utilization = utilization1 + delta * (time - time1 * getSchedulingInterval());
-		return utilization;
+        return utilization1 + delta * (time - time1 * getSchedulingInterval());
 
 	}
 
@@ -93,5 +92,9 @@ public class UtilizationModelPlanetLabInMemory implements UtilizationModel {
 	 */
 	public double getSchedulingInterval() {
 		return schedulingInterval;
+	}
+	
+	public double[] getData(){
+		return data;
 	}
 }

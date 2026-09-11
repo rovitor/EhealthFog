@@ -12,6 +12,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 
@@ -75,7 +76,7 @@ public class Switch extends SimEntity implements Node{
 
 	@Override
 	public void processEvent(SimEvent ev) {
-		int tag = ev.getTag();
+		CloudSimTags tag = ev.getTag();
 		
 		switch(tag){
 			//case Constants.SDN_INTERNAL_PACKAGE_PROCESS: internalPackageProcessing(); break;

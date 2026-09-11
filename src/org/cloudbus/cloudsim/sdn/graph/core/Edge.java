@@ -17,11 +17,7 @@ public class Edge implements Serializable {
 	private String name = "";
 	private long bandwidth = 0;
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param node the node that belongs to the edge.
-	 */
+
 	public Edge(Node to) {
 		this.dest = to;
 	}

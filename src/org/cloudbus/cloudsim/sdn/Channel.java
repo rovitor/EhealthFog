@@ -121,7 +121,7 @@ public class Channel {
 		double factor = this.getAdjustedRequestedBandwidth(); 
 		double adjustedBandwidth = this.getRequestedBandwidth() * factor;
 		if(factor < 1.0) {
-			Log.printLine("Link.adjustDedicatedBandwidthAlongLink(): Cannot allocate requested amount of BW"
+			Log.println("Link.adjustDedicatedBandwidthAlongLink(): Cannot allocate requested amount of BW"
 					+adjustedBandwidth+"/"+this.getRequestedBandwidth());
 		}			
 
@@ -221,7 +221,7 @@ public class Channel {
 		this.inTransmission.removeAll(completedTransmissions);
 		previousTime=currentTime;
 
-		Log.printLine(CloudSim.clock() + ": Channel.updatePackageProcessing() ("+this.toString()+"):Time spent:"+timeSpent+
+		Log.println(CloudSim.clock() + ": Channel.updatePackageProcessing() ("+this.toString()+"):Time spent:"+timeSpent+
 				", BW/host:"+getAllocatedBandwidthPerTransmission()+", Processed:"+processedThisRound);
 		
 		if(completedTransmissions.isEmpty())

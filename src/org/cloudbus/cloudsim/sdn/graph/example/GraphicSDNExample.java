@@ -220,7 +220,7 @@ public class GraphicSDNExample {
 	private void printCloudlet(Cloudlet cloudlet) {
 		String content = String.format(fInt, cloudlet.getCloudletId());
 
-		if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS) {
+		if (cloudlet.getStatus() == Cloudlet.CloudletStatus.SUCCESS) {
 			content = content +
 					  String.format(fString, "SUCCESS") +
 					  String.format(fInt, cloudlet.getResourceId()) +

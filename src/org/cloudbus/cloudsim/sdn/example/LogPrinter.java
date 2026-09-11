@@ -109,7 +109,7 @@ public class LogPrinter {
 	private static void printCloudlet(Cloudlet cloudlet) {
 		Log.print(String.format(fInt, cloudlet.getCloudletId()));
 
-		if (cloudlet.getCloudletStatus() == Cloudlet.SUCCESS) {
+		if (cloudlet.getStatus() == Cloudlet.CloudletStatus.SUCCESS) {
 			Log.print(String.format(fString, "SUCCESS"));
 			Log.print(String.format(fInt, cloudlet.getResourceId()));
 			Log.print(String.format(fInt, cloudlet.getVmId()));

@@ -58,15 +58,7 @@ public class Sensor extends SimEntity{
 		setLatency(latency);
 	}
 	
-	/**
-	 * This constructor is called from the code that generates PhysicalTopology from JSON
-	 * @param name
-	 * @param tupleType
-	 * @param string 
-	 * @param userId
-	 * @param appId
-	 * @param transmitDistribution
-	 */
+
 	public Sensor(String name, String tupleType, int userId, String appId, Distribution transmitDistribution) {
 		super(name);
 		this.setAppId(appId);
@@ -134,7 +126,9 @@ public class Sensor extends SimEntity{
 			transmit();
 			send(getId(), getTransmitDistribution().getNextValue(), FogEvents.EMIT_TUPLE);
 			break;
-		}
+            default:
+                throw new IllegalStateException("Unexpected value: " + ev.getTag());
+        }
 			
 	}
 

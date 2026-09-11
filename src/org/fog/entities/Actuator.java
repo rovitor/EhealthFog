@@ -48,7 +48,9 @@ public class Actuator extends SimEntity{
 		case FogEvents.TUPLE_ARRIVAL:
 			processTupleArrival(ev);
 			break;
-		}		
+            default:
+                throw new IllegalStateException("Unexpected value: " + ev.getTag());
+        }		
 	}
 
 	private void processTupleArrival(SimEvent ev) {

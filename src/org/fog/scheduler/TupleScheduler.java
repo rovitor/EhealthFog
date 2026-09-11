@@ -1,5 +1,6 @@
 package org.fog.scheduler;
 
+import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.ResCloudlet;
 
@@ -17,14 +18,14 @@ public class TupleScheduler extends CloudletSchedulerTimeShared{
 	 * @param time the time
 	 * @return the estimated finish time
 	 */
-	public double getEstimatedFinishTime(ResCloudlet rcl, double time) {
+	public double getEstimatedFinishTime(Cloudlet rcl, double time) {
 		//System.out.println("REMAINING CLOUDLET LENGTH : "+rcl.getRemainingCloudletLength()+"\tCLOUDLET LENGTH"+rcl.getCloudletLength());
 		//System.out.println("CURRENT ALLOC MIPS FOR CLOUDLET : "+getTotalCurrentAllocatedMipsForCloudlet(rcl, time));
 		
 		/*>>>>>>>>>>>>>>>>>>>>*/
 		/* edit made by HARSHIT GUPTA */
 		
-		System.out.println("ALLOCATED MIPS FOR CLOUDLET = "+getTotalCurrentAllocatedMipsForCloudlet(rcl, time));
+		//System.out.println("ALLOCATED MIPS FOR CLOUDLET = "+getTotalCurrentAllocatedMipsForCloudlet(rcl, time));
 		return time
 				+ ((rcl.getRemainingCloudletLength()) / getTotalCurrentAllocatedMipsForCloudlet(rcl, time));
 		

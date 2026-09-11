@@ -10,64 +10,50 @@ package org.cloudbus.cloudsim.distributions;
 
 import java.util.Random;
 
+import org.apache.commons.math3.distribution.UniformRealDistribution;
+
 /**
- * A random number generator based on the Uniform distribution.
+ * A pseudo random number generator following the 
+ * <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)">
+ * Uniform continuous distribution</a>.
  * 
  * @author Marcos Dias de Assuncao
  * @since CloudSim Toolkit 1.0
  */
 public class UniformDistr implements ContinuousDistribution {
 
-	/** The num gen. */
-	private final Random numGen;
-
-	/** The min. */
-	private final double mag, min;
+	/** The internal uniform pseudo random number generator. */
+	private final UniformRealDistribution numGen;
 
 	/**
-	 * Creates new uniform distribution.
+	 * Creates new uniform pseudo random number generator.
 	 * 
 	 * @param min minimum value
 	 * @param max maximum value
 	 */
 	public UniformDistr(double min, double max) {
-		if (min >= max) {
-			throw new IllegalArgumentException("Maximum must be greater than the minimum.");
-		}
-		numGen = new Random();
-		mag = max - min;
-		this.min = min;
+		numGen = new UniformRealDistribution(min, max);
 	}
 
 	/**
-	 * Creates new uniform distribution.
+	 * Creates new uniform pseudo random number generator.
 	 * 
 	 * @param min minimum value
 	 * @param max maximum value
 	 * @param seed simulation seed to be used
 	 */
 	public UniformDistr(double min, double max, long seed) {
-		if (min >= max) {
-			throw new IllegalArgumentException("Maximum must be greater than the minimum.");
-		}
-
-		numGen = new Random(seed);
-		mag = max - min;
-		this.min = min;
+		this(min, max);
+		numGen.reseedRandomGenerator(seed);
 	}
 
-	/**
-	 * Generate a new random number.
-	 * 
-	 * @return the next random number in the sequence
-	 */
 	@Override
 	public double sample() {
-		return (numGen.nextDouble() * (mag)) + min;
+		return numGen.sample();
 	}
 
 	/**
-	 * Generates a new random number based on the number generator and values provided as
+	 * Generates a new pseudo random number based on the generator and values provided as
 	 * parameters.
 	 * 
 	 * @param rd the random number generator
@@ -84,12 +70,12 @@ public class UniformDistr implements ContinuousDistribution {
 	}
 
 	/**
-	 * Set the random number generator's seed.
+	 * Sets the random number generator's seed.
 	 * 
 	 * @param seed the new seed for the generator
 	 */
 	public void setSeed(long seed) {
-		numGen.setSeed(seed);
+		numGen.reseedRandomGenerator(seed);
 	}
 
 }

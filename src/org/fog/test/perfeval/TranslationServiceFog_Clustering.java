@@ -83,6 +83,7 @@ public class TranslationServiceFog_Clustering {
 
             if (randomMobility_generator) {
                 datasetReference = References.dataset_random;
+                Log.printLine(datasetReference);
                 createRandomMobilityDatasets(References.random_walk_mobility_model, datasetReference, renewDataset);
             }
 
@@ -221,7 +222,6 @@ public class TranslationServiceFog_Clustering {
      * @param ram         RAM
      * @param upBw        uplink bandwidth
      * @param downBw      downlink bandwidth
-     * @param level       hierarchy level of the device
      * @param ratePerMips cost rate per MIPS used
      * @param busyPower
      * @param idlePower

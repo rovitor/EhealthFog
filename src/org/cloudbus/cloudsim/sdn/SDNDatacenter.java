@@ -17,6 +17,7 @@ import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
+import org.cloudbus.cloudsim.core.CloudActionTags;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
@@ -51,7 +52,7 @@ public class SDNDatacenter extends Datacenter {
 	protected void processVmCreate(SimEvent ev, boolean ack) {
 		super.processVmCreate(ev, ack);
 		if(ack) {
-			send(nos.getId(), CloudSim.getMinTimeBetweenEvents(), CloudSimTags.VM_CREATE_ACK, ev.getData());
+			send(nos.getId(), CloudSim.getMinTimeBetweenEvents(), CloudActionTags.VM_CREATE_ACK, ev.getData());
 		}
 			
 	}
@@ -81,7 +82,7 @@ public class SDNDatacenter extends Datacenter {
 					Cloudlet cl = vm.getCloudletScheduler().getNextFinishedCloudlet();
 					if (cl != null) {
 						int hostAddress = nos.getHostAddressByVmId(cl.getVmId());
-						sendNow(hostAddress, CloudSimTags.CLOUDLET_RETURN, cl);
+						sendNow(hostAddress, CloudActionTags.CLOUDLET_RETURN, cl);
 					}
 				}
 			}

@@ -14,8 +14,10 @@
 
 package org.cloudbus.cloudsim;
 
+import org.cloudbus.cloudsim.core.CloudSimTags;
+
 /**
- * This class contains the structure for a network packet.
+ * Defines the structure for a network packet.
  * 
  * @author Gokul Poduval
  * @author Chen-Khong Tham, National University of Singapore
@@ -85,6 +87,10 @@ public interface Packet {
 	 * @return the network service type
 	 * @pre $none
 	 * @post $none
+         * 
+         * //@TODO Is it the Type of Service (ToS) of IPv4, like in
+         * the {@link Cloudlet#netToS}? If yes, so the names would
+         * be standardized.
 	 */
 	int getNetServiceType();
 
@@ -119,12 +125,12 @@ public interface Packet {
 	void setLast(int last);
 
 	/**
-	 * Gets this packet tag
-	 * 
-	 * @return this packet tag
-	 * @pre $none
-	 * @post $none
-	 */
-	int getTag();
+     * Gets this packet tag
+     *
+     * @return this packet tag
+     * @pre $none
+     * @post $none
+     */
+	CloudSimTags getTag();
 
 }

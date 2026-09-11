@@ -13,23 +13,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.core.GuestEntity;
 
 /**
- * The Class PeProvisionerSimple.
+ * PeProvisionerSimple is an extension of {@link PeProvisioner} which uses a best-effort policy to
+ * allocate virtual PEs to VMs: 
+ * if there is available mips on the physical PE, it allocates to a virtual PE; otherwise, it fails. 
+ * Each host's PE has to have its own instance of a PeProvisioner.
  * 
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 2.0
  */
 public class PeProvisionerSimple extends PeProvisioner {
 
-	/** The pe table. */
+	/** The PE map, where each key is a VM id and each value
+         * is the list of in terms of their allocated amount of MIPS to that VM. */
 	private Map<String, List<Double>> peTable;
 
 	/**
-	 * Creates the PeProvisionerSimple object.
+	 * Instantiates a new pe provisioner simple.
 	 * 
-	 * @param availableMips the available mips
+	 * @param availableMips The total mips capacity of the PE that the provisioner can allocate to VMs. 
 	 * 
 	 * @pre $none
 	 * @post $none
@@ -39,112 +43,67 @@ public class PeProvisionerSimple extends PeProvisioner {
 		setPeTable(new HashMap<String, ArrayList<Double>>());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.PeProvisioner#allocateMipsForVM(cloudsim.power.VM, int)
-	 */
 	@Override
-	public boolean allocateMipsForVm(Vm vm, double mips) {
-		return allocateMipsForVm(vm.getUid(), mips);
+	public boolean allocateMipsForGuest(GuestEntity guest, double mips) {
+		return allocateMipsForGuest(guest.getUid(), mips);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.PeProvisioner#allocateMipsForVm(java.lang.String, double)
-	 */
 	@Override
-	public boolean allocateMipsForVm(String vmUid, double mips) {
+	public boolean allocateMipsForGuest(String vmUid, double mips) {
 		if (getAvailableMips() < mips) {
 			return false;
 		}
 
-		List<Double> allocatedMips;
+        List<Double> allocatedMips = getPeTable().computeIfAbsent(vmUid, k -> new ArrayList<>());
 
-		if (getPeTable().containsKey(vmUid)) {
-			allocatedMips = getPeTable().get(vmUid);
-		} else {
-			allocatedMips = new ArrayList<Double>();
-		}
-
-		allocatedMips.add(mips);
-
+        allocatedMips.add(mips);
 		setAvailableMips(getAvailableMips() - mips);
-		getPeTable().put(vmUid, allocatedMips);
 
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.PeProvisioner#allocateMipsForVM(cloudsim.power.VM,
-	 * java.util.ArrayList)
-	 */
 	@Override
-	public boolean allocateMipsForVm(Vm vm, List<Double> mips) {
-		int totalMipsToAllocate = 0;
+	public boolean allocateMipsForGuest(GuestEntity guest, List<Double> mips) {
+		deallocateMipsForGuest(guest);
 		for (double _mips : mips) {
-			totalMipsToAllocate += _mips;
+			if (!allocateMipsForGuest(guest.getUid(), _mips)) {
+				return false;
+			}
 		}
-
-		if (getAvailableMips() + getTotalAllocatedMipsForVm(vm) < totalMipsToAllocate) {
-			return false;
-		}
-
-		setAvailableMips(getAvailableMips() + getTotalAllocatedMipsForVm(vm) - totalMipsToAllocate);
-
-		getPeTable().put(vm.getUid(), mips);
 
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.PeProvisioner#deallocateMipsForAllVms()
-	 */
 	@Override
-	public void deallocateMipsForAllVms() {
-		super.deallocateMipsForAllVms();
+	public void deallocateMipsForAllGuests() {
+		super.deallocateMipsForAllGuests();
 		getPeTable().clear();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * cloudsim.provisioners.PeProvisioner#getAllocatedMipsForVMByVirtualPeId(cloudsim.power.VM,
-	 * int)
-	 */
 	@Override
-	public double getAllocatedMipsForVmByVirtualPeId(Vm vm, int peId) {
-		if (getPeTable().containsKey(vm.getUid())) {
-			try {
-				return getPeTable().get(vm.getUid()).get(peId);
-			} catch (Exception e) {
-			}
+	public double getAllocatedMipsForGuestByVirtualPeId(GuestEntity guest, int peId) {
+		List<Double> allocatedMips = getAllocatedMipsForGuest(guest);
+		if (allocatedMips != null && peId < allocatedMips.size()) {
+			return allocatedMips.get(peId);
 		}
 		return 0;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.PeProvisioner#getAllocatedMipsForVM(cloudsim.power.VM)
-	 */
 	@Override
-	public List<Double> getAllocatedMipsForVm(Vm vm) {
-		if (getPeTable().containsKey(vm.getUid())) {
-			return getPeTable().get(vm.getUid());
+	public List<Double> getAllocatedMipsForGuest(GuestEntity guest) {
+		if (getPeTable().containsKey(guest.getUid())) {
+			return getPeTable().get(guest.getUid());
 		}
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.PeProvisioner#getTotalAllocatedMipsForVM(cloudsim.power.VM)
-	 */
 	@Override
-	public double getTotalAllocatedMipsForVm(Vm vm) {
-		if (getPeTable().containsKey(vm.getUid())) {
+	public double getTotalAllocatedMipsForGuest(GuestEntity guest) {
+		List<Double> allocatedMips = getAllocatedMipsForGuest(guest);
+
+		if (allocatedMips != null) {
 			double totalAllocatedMips = 0.0;
-			for (double mips : getPeTable().get(vm.getUid())) {
+			for (double mips : allocatedMips) {
 				totalAllocatedMips += mips;
 			}
 			return totalAllocatedMips;
@@ -152,31 +111,29 @@ public class PeProvisionerSimple extends PeProvisioner {
 		return 0;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.PeProvisioner#deallocateMipsForVM(cloudsim.power.VM)
-	 */
 	@Override
-	public void deallocateMipsForVm(Vm vm) {
-		if (getPeTable().containsKey(vm.getUid())) {
-			for (double mips : getPeTable().get(vm.getUid())) {
+	public void deallocateMipsForGuest(GuestEntity guest) {
+		List<Double> allocatedMips = getAllocatedMipsForGuest(guest);
+
+		if (allocatedMips != null) {
+			for (double mips : allocatedMips) {
 				setAvailableMips(getAvailableMips() + mips);
 			}
-			getPeTable().remove(vm.getUid());
+			getPeTable().remove(guest.getUid());
 		}
 	}
 
 	/**
-	 * Gets the pe table.
+	 * Gets the pe map.
 	 * 
-	 * @return the peTable
+	 * @return the pe map
 	 */
 	protected Map<String, List<Double>> getPeTable() {
 		return peTable;
 	}
 
 	/**
-	 * Sets the pe table.
+	 * Sets the pe map.
 	 * 
 	 * @param peTable the peTable to set
 	 */
@@ -184,5 +141,4 @@ public class PeProvisionerSimple extends PeProvisioner {
 	protected void setPeTable(Map<String, ? extends List<Double>> peTable) {
 		this.peTable = (Map<String, List<Double>>) peTable;
 	}
-
 }

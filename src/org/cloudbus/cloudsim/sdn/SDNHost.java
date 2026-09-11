@@ -15,10 +15,7 @@ import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Vm;
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.CloudSimTags;
-import org.cloudbus.cloudsim.core.SimEntity;
-import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.core.*;
 
 
 /**
@@ -32,7 +29,7 @@ import org.cloudbus.cloudsim.core.SimEvent;
 public class SDNHost extends SimEntity implements Node {
 	private static final double PROCESSING_DELAY= 0.1;
 		
-	Host host;
+	HostEntity host;
 	EdgeSwitch sw;
 	//Hashtable<Integer,Vm> vms;
 	Hashtable<Integer,Middlebox> middleboxes;
@@ -42,7 +39,7 @@ public class SDNHost extends SimEntity implements Node {
 	int rank = -1;
 	NetworkOperatingSystem nos;
 
-	SDNHost(Host host, NetworkOperatingSystem nos){
+	SDNHost(HostEntity host, NetworkOperatingSystem nos){
 		super("Host"+host.getId());
 		this.host=host;
 		this.nos = nos;
@@ -54,7 +51,7 @@ public class SDNHost extends SimEntity implements Node {
 		this.routingTable = new RoutingTable();
 	}
 	
-	public Host getHost(){
+	public HostEntity getHost(){
 		return host;
 	}
 	
@@ -69,7 +66,7 @@ public class SDNHost extends SimEntity implements Node {
 */	
 	public void addMiddlebox(Middlebox m){
 		middleboxes.put(m.getId(), m);
-		host.vmCreate(m.getVm());
+		host.guestCreate(m.getVm());
 	}
 
 	@Override
@@ -80,17 +77,17 @@ public class SDNHost extends SimEntity implements Node {
 
 	@Override
 	public void processEvent(SimEvent ev) {
-		int tag = ev.getTag();
+		CloudSimTags tag = ev.getTag();
 		
 		switch(tag){
 			case Constants.SDN_PACKAGE: processPackage((Package) ev.getData()); break;
-			case CloudSimTags.CLOUDLET_RETURN: processCloudletReturn((Cloudlet) ev.getData()); break;
+			case CloudActionTags.CLOUDLET_RETURN: processCloudletReturn((Cloudlet) ev.getData()); break;
 			default: System.out.println("Unknown event received by "+super.getName()+". Tag:"+ev.getTag());
 		}
 	}
 	
 	private Vm findVm(int vmId) {
-		List<Vm> vms = host.getVmList();
+		List<Vm> vms = host.getGuestList();
 		for(Vm vm:vms) {
 			if(vm.getId() == vmId) {
 				return vm;
@@ -145,7 +142,7 @@ public class SDNHost extends SimEntity implements Node {
 				cl.setVmId(vmId);
 				
 				requestsTable.put(cl, req);
-				sendNow(host.getDatacenter().getId(),CloudSimTags.CLOUDLET_SUBMIT,cl);
+				sendNow(host.getDatacenter().getId(),CloudActionTags.CLOUDLET_SUBMIT,cl);
 		} else {
 			Log.printLine(CloudSim.clock() + ": " + getName() + ": Activity is unknown..");
 		}

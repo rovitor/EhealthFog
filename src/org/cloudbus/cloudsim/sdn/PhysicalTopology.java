@@ -11,8 +11,6 @@ package org.cloudbus.cloudsim.sdn;
 import java.util.Collection;
 import java.util.Hashtable;
 
-import org.cloudbus.cloudsim.network.datacenter.AggregateSwitch;
-
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -56,7 +54,7 @@ public class PhysicalTopology {
 		nodesTable.put(node.getAddress(), node);
 		if (node instanceof CoreSwitch){//coreSwitch is rank 0 (root)
 			node.setRank(0);
-		} else if (node instanceof AggregateSwitch){//Hosts are on the bottom of hierarchy (leaf)
+		} else if (node instanceof AggregationSwitch){//Hosts are on the bottom of hierarchy (leaf)
 			node.setRank(1);
 		} else if (node instanceof EdgeSwitch){//Edge switches are just before hosts in the hierarchy
 			node.setRank(2);

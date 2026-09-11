@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.core.GuestEntity;
 import org.cloudbus.cloudsim.provisioners.PeProvisioner;
 
 /**
@@ -48,17 +49,17 @@ public class PeProvisionerOverbooking extends PeProvisioner {
 	 * (non-Javadoc)
 	 * @see cloudsim.provisioners.PeProvisioner#allocateMipsForVM(cloudsim.power.VM, int)
 	 */
-	@Override
-	public boolean allocateMipsForVm(Vm vm, double mips) {
-		return allocateMipsForVm(vm.getUid(), mips);
+
+	public boolean allocateMipsForGuest(GuestEntity vm, double mips) {
+		return allocateMipsForGuest(vm.getUid(), mips);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see cloudsim.provisioners.PeProvisioner#allocateMipsForVm(java.lang.String, double)
 	 */
-	@Override
-	public boolean allocateMipsForVm(String vmUid, double mips) {
+
+	public boolean allocateMipsForGuest(String vmUid, double mips) {
 		if (getAvailableMips() < mips) {
 			return false;
 		}
@@ -84,18 +85,17 @@ public class PeProvisionerOverbooking extends PeProvisioner {
 	 * @see cloudsim.provisioners.PeProvisioner#allocateMipsForVM(cloudsim.power.VM,
 	 * java.util.ArrayList)
 	 */
-	@Override
-	public boolean allocateMipsForVm(Vm vm, List<Double> mips) {
+	public boolean allocateMipsForGuest(GuestEntity vm, List<Double> mips) {
 		int totalMipsToAllocate = 0;
 		for (double _mips : mips) {
 			totalMipsToAllocate += _mips;
 		}
 
-		if (getAvailableMips() + getTotalAllocatedMipsForVm(vm) < totalMipsToAllocate) {
+		if (getAvailableMips() + getTotalAllocatedMipsForGuest(vm) < totalMipsToAllocate) {
 			return false;
 		}
 
-		setAvailableMips(getAvailableMips() + getTotalAllocatedMipsForVm(vm) - totalMipsToAllocate);
+		setAvailableMips(getAvailableMips() + getTotalAllocatedMipsForGuest(vm) - totalMipsToAllocate);
 
 		getPeTable().put(vm.getUid(), mips);
 
@@ -107,8 +107,8 @@ public class PeProvisionerOverbooking extends PeProvisioner {
 	 * @see cloudsim.provisioners.PeProvisioner#deallocateMipsForAllVms()
 	 */
 	@Override
-	public void deallocateMipsForAllVms() {
-		super.deallocateMipsForAllVms();
+	public void deallocateMipsForAllGuests() {
+		super.deallocateMipsForAllGuests();
 		
 		setAvailableMips(PeProvisionerOverbooking.getOverbookedMips(getMips()));	//Overbooking
 
@@ -121,8 +121,7 @@ public class PeProvisionerOverbooking extends PeProvisioner {
 	 * cloudsim.provisioners.PeProvisioner#getAllocatedMipsForVMByVirtualPeId(cloudsim.power.VM,
 	 * int)
 	 */
-	@Override
-	public double getAllocatedMipsForVmByVirtualPeId(Vm vm, int peId) {
+	public double getAllocatedMipsForGuestByVirtualPeId(GuestEntity vm, int peId) {
 		if (getPeTable().containsKey(vm.getUid())) {
 			try {
 				return getPeTable().get(vm.getUid()).get(peId);
@@ -137,7 +136,7 @@ public class PeProvisionerOverbooking extends PeProvisioner {
 	 * @see cloudsim.provisioners.PeProvisioner#getAllocatedMipsForVM(cloudsim.power.VM)
 	 */
 	@Override
-	public List<Double> getAllocatedMipsForVm(Vm vm) {
+	public List<Double> getAllocatedMipsForGuest(GuestEntity vm) {
 		if (getPeTable().containsKey(vm.getUid())) {
 			return getPeTable().get(vm.getUid());
 		}
@@ -149,7 +148,7 @@ public class PeProvisionerOverbooking extends PeProvisioner {
 	 * @see cloudsim.provisioners.PeProvisioner#getTotalAllocatedMipsForVM(cloudsim.power.VM)
 	 */
 	@Override
-	public double getTotalAllocatedMipsForVm(Vm vm) {
+	public double getTotalAllocatedMipsForGuest(GuestEntity vm) {
 		if (getPeTable().containsKey(vm.getUid())) {
 			double totalAllocatedMips = 0.0;
 			for (double mips : getPeTable().get(vm.getUid())) {
@@ -165,7 +164,7 @@ public class PeProvisionerOverbooking extends PeProvisioner {
 	 * @see cloudsim.provisioners.PeProvisioner#deallocateMipsForVM(cloudsim.power.VM)
 	 */
 	@Override
-	public void deallocateMipsForVm(Vm vm) {
+	public void deallocateMipsForGuest(GuestEntity vm) {
 		if (getPeTable().containsKey(vm.getUid())) {
 			for (double mips : getPeTable().get(vm.getUid())) {
 				setAvailableMips(getAvailableMips() + mips);

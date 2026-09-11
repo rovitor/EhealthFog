@@ -16,21 +16,25 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Storage;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
+import org.cloudbus.cloudsim.VmAllocationPolicy.GuestMapping;
+import org.cloudbus.cloudsim.core.CloudActionTags;
 import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.CloudSimTags;
+import org.cloudbus.cloudsim.core.GuestEntity;
 import org.cloudbus.cloudsim.core.predicates.PredicateType;
 
 /**
- * PowerDatacenterNonPowerAware is a class that represents a non-power aware data center in the
+ * PowerDatacenterNonPowerAware is a class that represents a <b>non-power</b> aware data center in the
  * context of power-aware simulations.
  * 
- * If you are using any algorithms, policies or workload included in the power package please cite
- * the following paper:
+ * <br/>If you are using any algorithms, policies or workload included in the power package please cite
+ * the following paper:<br/>
  * 
- * Anton Beloglazov, and Rajkumar Buyya, "Optimal Online Deterministic Algorithms and Adaptive
+ * <ul>
+ * <li><a href="http://dx.doi.org/10.1002/cpe.1867">Anton Beloglazov, and Rajkumar Buyya, "Optimal Online Deterministic Algorithms and Adaptive
  * Heuristics for Energy and Performance Efficient Dynamic Consolidation of Virtual Machines in
  * Cloud Data Centers", Concurrency and Computation: Practice and Experience (CCPE), Volume 24,
- * Issue 13, Pages: 1397-1420, John Wiley & Sons, Ltd, New York, USA, 2012
+ * Issue 13, Pages: 1397-1420, John Wiley &amp; Sons, Ltd, New York, USA, 2012</a>
+ * </ul>
  * 
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 2.0
@@ -40,10 +44,9 @@ public class PowerDatacenterNonPowerAware extends PowerDatacenter {
 	/**
 	 * Instantiates a new datacenter.
 	 * 
-	 * @param name the name
-	 * @param characteristics the res config
+	 * @param name the datacenter name
+	 * @param characteristics the datacenter characteristics
 	 * @param schedulingInterval the scheduling interval
-	 * @param utilizationBound the utilization bound
 	 * @param vmAllocationPolicy the vm provisioner
 	 * @param storageList the storage list
 	 * 
@@ -58,19 +61,11 @@ public class PowerDatacenterNonPowerAware extends PowerDatacenter {
 		super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
 	}
 
-	/**
-	 * Updates processing of each cloudlet running in this PowerDatacenter. It is necessary because
-	 * Hosts and VirtualMachines are simple objects, not entities. So, they don't receive events and
-	 * updating cloudlets inside them must be called from the outside.
-	 * 
-	 * @pre $none
-	 * @post $none
-	 */
 	@Override
 	protected void updateCloudletProcessing() {
 		if (getCloudletSubmitted() == -1 || getCloudletSubmitted() == CloudSim.clock()) {
-			CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.VM_DATACENTER_EVENT));
-			schedule(getId(), getSchedulingInterval(), CloudSimTags.VM_DATACENTER_EVENT);
+			CloudSim.cancelAll(getId(), new PredicateType(CloudActionTags.VM_DATACENTER_EVENT));
+			schedule(getId(), getSchedulingInterval(), CloudActionTags.VM_DATACENTER_EVENT);
 			return;
 		}
 		double currentTime = CloudSim.clock();
@@ -80,7 +75,7 @@ public class PowerDatacenterNonPowerAware extends PowerDatacenter {
 			double timeDiff = currentTime - getLastProcessTime();
 			double minTime = Double.MAX_VALUE;
 
-			Log.printLine("\n");
+			Log.println("\n");
 
 			for (PowerHost host : this.<PowerHost> getHostList()) {
 				Log.formatLine("%.2f: Host #%d", CloudSim.clock(), host.getId());
@@ -108,12 +103,12 @@ public class PowerDatacenterNonPowerAware extends PowerDatacenter {
 
 			Log.formatLine("\n%.2f: Consumed energy is %.2f W*sec\n", CloudSim.clock(), timeframePower);
 
-			Log.printLine("\n\n--------------------------------------------------------------\n\n");
+			Log.println("\n\n--------------------------------------------------------------\n\n");
 
 			for (PowerHost host : this.<PowerHost> getHostList()) {
 				Log.formatLine("\n%.2f: Host #%d", CloudSim.clock(), host.getId());
 
-				double time = host.updateVmsProcessing(currentTime); // inform VMs to update
+				double time = host.updateCloudletsProcessing(currentTime); // inform VMs to update
 																		// processing
 				if (time < minTime) {
 					minTime = time;
@@ -126,23 +121,23 @@ public class PowerDatacenterNonPowerAware extends PowerDatacenter {
 
 			/** Remove completed VMs **/
 			for (PowerHost host : this.<PowerHost> getHostList()) {
-				for (Vm vm : host.getCompletedVms()) {
-					getVmAllocationPolicy().deallocateHostForVm(vm);
+				for (GuestEntity vm : host.getCompletedVms()) {
+					getVmAllocationPolicy().deallocateHostForGuest(vm);
 					getVmList().remove(vm);
-					Log.printLine("VM #" + vm.getId() + " has been deallocated from host #" + host.getId());
+					Log.println("VM #" + vm.getId() + " has been deallocated from host #" + host.getId());
 				}
 			}
 
-			Log.printLine();
+			Log.println();
 
 			if (!isDisableMigrations()) {
-				List<Map<String, Object>> migrationMap = getVmAllocationPolicy().optimizeAllocation(
+				List<GuestMapping> migrationMap = getVmAllocationPolicy().optimizeAllocation(
 						getVmList());
 
 				if (migrationMap != null) {
-					for (Map<String, Object> migrate : migrationMap) {
-						Vm vm = (Vm) migrate.get("vm");
-						PowerHost targetHost = (PowerHost) migrate.get("host");
+					for (GuestMapping migrate : migrationMap) {
+						Vm vm = (Vm) migrate.vm();
+						PowerHost targetHost = (PowerHost) migrate.host();
 						PowerHost oldHost = (PowerHost) vm.getHost();
 
 						if (oldHost == null) {
@@ -160,14 +155,14 @@ public class PowerDatacenterNonPowerAware extends PowerDatacenter {
 									targetHost.getId());
 						}
 
-						targetHost.addMigratingInVm(vm);
+						targetHost.addMigratingInGuest(vm);
 						incrementMigrationCount();
 
 						/** VM migration delay = RAM / bandwidth + C (C = 10 sec) **/
 						send(
 								getId(),
 								vm.getRam() / ((double) vm.getBw() / 8000) + 10,
-								CloudSimTags.VM_MIGRATE,
+								CloudActionTags.VM_MIGRATE,
 								migrate);
 					}
 				}
@@ -175,9 +170,9 @@ public class PowerDatacenterNonPowerAware extends PowerDatacenter {
 
 			// schedules an event to the next time
 			if (minTime != Double.MAX_VALUE) {
-				CloudSim.cancelAll(getId(), new PredicateType(CloudSimTags.VM_DATACENTER_EVENT));
+				CloudSim.cancelAll(getId(), new PredicateType(CloudActionTags.VM_DATACENTER_EVENT));
 				// CloudSim.cancelAll(getId(), CloudSim.SIM_ANY);
-				send(getId(), getSchedulingInterval(), CloudSimTags.VM_DATACENTER_EVENT);
+				send(getId(), getSchedulingInterval(), CloudActionTags.VM_DATACENTER_EVENT);
 			}
 
 			setLastProcessTime(currentTime);

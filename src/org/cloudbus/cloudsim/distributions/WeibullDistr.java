@@ -11,63 +11,45 @@ package org.cloudbus.cloudsim.distributions;
 
 import java.util.Random;
 
+import org.apache.commons.math3.distribution.WeibullDistribution;
+
 /**
- * The Class WeibullDistr.
+ * A pseudo random number generator following the 
+ * <a href="https://en.wikipedia.org/wiki/Weibull_distribution">Weibull distribution</a>.
  * 
  * @author Marcos Dias de Assuncao
  * @since CloudSim Toolkit 1.0
  */
 public class WeibullDistr implements ContinuousDistribution {
 
-	/** The num gen. */
-	private final Random numGen;
-
-	/** The alpha. */
-	private final double alpha;
-
-	/** The beta. */
-	private final double beta;
+	/** The internal Weibull pseudo random number generator. */
+	private final WeibullDistribution numGen;
 
 	/**
-	 * Instantiates a new weibull distr.
+	 * Instantiates a new Weibull pseudo random number generator.
 	 * 
 	 * @param seed the seed
 	 * @param alpha the alpha
 	 * @param beta the beta
 	 */
 	public WeibullDistr(Random seed, double alpha, double beta) {
-		if (alpha <= 0.0 || beta <= 0.0) {
-			throw new IllegalArgumentException("Alpha and beta must be greater than 0.0");
-		}
-
-		numGen = seed;
-		this.alpha = alpha;
-		this.beta = beta;
+		this(alpha, beta);
+		numGen.reseedRandomGenerator(seed.nextLong());
 	}
 
 	/**
-	 * Instantiates a new weibull distr.
+	 * Instantiates a new Weibull pseudo random number generator.
 	 * 
 	 * @param alpha the alpha
 	 * @param beta the beta
 	 */
 	public WeibullDistr(double alpha, double beta) {
-		if (alpha <= 0.0 || beta <= 0.0) {
-			throw new IllegalArgumentException("Alpha and beta must be greater than 0.0");
-		}
-
-		numGen = new Random(System.currentTimeMillis());
-		this.alpha = alpha;
-		this.beta = beta;
+		numGen = new WeibullDistribution(alpha, beta);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.distributions.ContinuousDistribution#sample()
-	 */
 	@Override
 	public double sample() {
-		return beta * Math.pow(-Math.log(numGen.nextDouble()), 1 / alpha);
+		return numGen.sample();
 	}
 
 }

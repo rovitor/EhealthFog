@@ -71,19 +71,19 @@ public class ForwardingRule {
 				for(Integer flowId:nodes.keySet()) {
 					Node node = nodes.get(flowId);
 					if(node instanceof SDNHost) {
-						Log.printLine(thisNode + ": "+
+						Log.println(thisNode + ": "+
 								NetworkOperatingSystem.debugVmIdName.get(rowK) + "->" + 
 								NetworkOperatingSystem.debugVmIdName.get(colK) + "->"+"(flow:"+flowId+")" + 
 								((SDNHost) node).getName());
 					}
 					else if(node instanceof Switch) {
-						Log.printLine(thisNode + ": "+
+						Log.println(thisNode + ": "+
 								NetworkOperatingSystem.debugVmIdName.get(rowK) + "->" + 
 								NetworkOperatingSystem.debugVmIdName.get(colK) + "->"+"(flow:"+flowId+")" + 
 								((Switch) node).getName());
 					}
 					else {
-						Log.printLine(thisNode + ": "+
+						Log.println(thisNode + ": "+
 								NetworkOperatingSystem.debugVmIdName.get(rowK) + "->" + 
 								NetworkOperatingSystem.debugVmIdName.get(colK) + "->"+"(flow:"+flowId+")" + 
 								node.getAddress());

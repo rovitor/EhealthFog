@@ -105,8 +105,10 @@ public class Controller extends SimEntity{
 			printNetworkUsageDetails();
 			System.exit(0);
 			break;
-			
-		}
+
+            default:
+                throw new IllegalStateException("Unexpected value: " + ev.getTag());
+        }
 	}
 	
 	private void printNetworkUsageDetails() {

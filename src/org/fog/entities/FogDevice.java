@@ -2,9 +2,7 @@ package org.fog.entities;
 
 import org.apache.commons.math3.util.Pair;
 import org.cloudbus.cloudsim.*;
-import org.cloudbus.cloudsim.core.CloudSim;
-import org.cloudbus.cloudsim.core.CloudSimTags;
-import org.cloudbus.cloudsim.core.SimEvent;
+import org.cloudbus.cloudsim.core.*;
 import org.cloudbus.cloudsim.power.PowerDatacenter;
 import org.cloudbus.cloudsim.power.PowerHost;
 import org.cloudbus.cloudsim.power.models.PowerModel;
@@ -109,7 +107,7 @@ public class FogDevice extends PowerDatacenter {
         setUplinkLatency(uplinkLatency);
         setRatePerMips(ratePerMips);
         setAssociatedActuatorIds(new ArrayList<Pair<Integer, Double>>());
-        for (Host host : getCharacteristics().getHostList()) {
+        for (HostEntity host : getCharacteristics().getHostList()) {
             host.setDatacenter(this);
         }
         setActiveApplications(new ArrayList<String>());
@@ -197,7 +195,7 @@ public class FogDevice extends PowerDatacenter {
         setDownlinkBandwidth(downlinkBandwidth);
         setUplinkLatency(uplinkLatency);
         setAssociatedActuatorIds(new ArrayList<Pair<Integer, Double>>());
-        for (Host host1 : getCharacteristics().getHostList()) {
+        for (HostEntity host1 : getCharacteristics().getHostList()) {
             host1.setDatacenter(this);
         }
         setActiveApplications(new ArrayList<String>());
@@ -236,7 +234,7 @@ public class FogDevice extends PowerDatacenter {
 
     /**
      * Overrides this method when making a new and different type of resource. <br>
-     * <b>NOTE:</b> You do not need to override {@link #body()} method, if you use this method.
+     * <b>NOTE:</b> You do not need to override {@link} method, if you use this method.
      *
      * @pre $none
      * @post $none
@@ -426,9 +424,9 @@ public class FogDevice extends PowerDatacenter {
         double timeFrameDatacenterEnergy = 0.0;
 
         for (PowerHost host : this.<PowerHost>getHostList()) {
-            Log.printLine();
+            Log.println();
 
-            double time = host.updateVmsProcessing(currentTime); // inform VMs to update processing
+            double time = host.updateCloudletsProcessing(currentTime); // inform VMs to update processing
             if (time < minTime) {
                 minTime = time;
             }
@@ -521,7 +519,7 @@ public class FogDevice extends PowerDatacenter {
                             updateTimingsOnSending(resTuple);
                             sendToSelf(resTuple);
                         }
-                        sendNow(cl.getUserId(), CloudSimTags.CLOUDLET_RETURN, cl);
+                        sendNow(cl.getUserId(), CloudActionTags.CLOUDLET_RETURN, cl);
                     }
                 }
             }
@@ -1088,7 +1086,7 @@ public class FogDevice extends PowerDatacenter {
     public void removeChild(int childId) {
         // TODO Auto-generated method stub
         @SuppressWarnings("deprecation")
-        Integer childIDobject = new Integer(childId);
+        Integer childIDobject = Integer.valueOf(childId);
         if (getChildrenIds().contains(childId) && childId != getId())
             getChildrenIds().remove(childIDobject);
         if (getChildToOperatorsMap().containsKey(childId)) {

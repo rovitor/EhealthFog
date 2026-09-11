@@ -20,7 +20,7 @@ import org.cloudbus.cloudsim.core.SimEvent;
  */
 public class PredicateNotFrom extends Predicate {
 
-	/** The ids. */
+	/** The IDs of source entities to check if events were not sent from. */
 	private final int[] ids;
 
 	/**
@@ -42,14 +42,15 @@ public class PredicateNotFrom extends Predicate {
 	}
 
 	/**
-	 * The match function called by {@link Simulation}, not used directly by the user.
+	 * Matches any event <b>not</b> received from the registered sources.
 	 * 
-	 * @param ev the event to check
-	 * @return <code>true</code> if the event matches the predicate, <code>false</code> otherwise
+	 * @param ev {@inheritDoc}
+	 * @return {@inheritDoc}
+         * @see #ids
 	 */
 	@Override
 	public boolean match(SimEvent ev) {
-		int src = ev.getSource();
+		int src = ev.getSourceId();
 		for (int id : ids) {
 			if (src == id) {
 				return false;

@@ -9,6 +9,7 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmScheduler;
+import org.cloudbus.cloudsim.core.CloudActionTags;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
@@ -38,11 +39,11 @@ public class OverbookingNetworkOperatingSystem extends NetworkOperatingSystem {
 			TimedVm tvm = (TimedVm) vm;
 			Log.printLine(CloudSim.clock() + ": " + getName() + ": Trying to Create VM #" + vm.getId()
 					+ " in " + datacenter.getName() + ", (" + tvm.getStartTime() + "~" +tvm.getFinishTime() + ")");
-			send(datacenter.getId(), tvm.getStartTime(), CloudSimTags.VM_CREATE_ACK, vm);
+			send(datacenter.getId(), tvm.getStartTime(), CloudActionTags.VM_CREATE_ACK, vm);
 			
 			if(tvm.getFinishTime() != Double.POSITIVE_INFINITY) {
-				send(datacenter.getId(), tvm.getFinishTime(), CloudSimTags.VM_DESTROY, vm);
-				send(this.getId(), tvm.getFinishTime(), CloudSimTags.VM_DESTROY, vm);
+				send(datacenter.getId(), tvm.getFinishTime(), CloudActionTags.VM_DESTROY, vm);
+				send(this.getId(), tvm.getFinishTime(), CloudActionTags.VM_DESTROY, vm);
 			}
 		}
 		return true;

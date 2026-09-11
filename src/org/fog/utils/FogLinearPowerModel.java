@@ -1,5 +1,6 @@
 package org.fog.utils;
 
+import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.power.models.PowerModel;
 
 /**

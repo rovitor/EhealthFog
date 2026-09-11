@@ -2,12 +2,12 @@ package org.fog.policy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
-import org.fog.application.AppModule;
+import org.cloudbus.cloudsim.core.GuestEntity;
+import org.cloudbus.cloudsim.core.HostEntity;
 
 public class AppModuleAllocationPolicy extends VmAllocationPolicy{
 
@@ -43,9 +43,9 @@ public class AppModuleAllocationPolicy extends VmAllocationPolicy{
 		return result;
 	}
 
-	@Override
-	public List<Map<String, Object>> optimizeAllocation(
-			List<? extends Vm> vmList) {
+
+	public List<GuestMapping> optimizeAllocation(
+			List<? extends GuestEntity> vmList) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -81,6 +81,15 @@ public class AppModuleAllocationPolicy extends VmAllocationPolicy{
 
 	public void setAppModuleIds(List<Integer> appModuleIds) {
 		this.appModuleIds = appModuleIds;
+	}
+
+	public HostEntity findHostForGuest(GuestEntity guest) {
+		for (HostEntity host : getHostList()) {
+			if (host.isSuitableForGuest(guest)) {
+				return host;
+			}
+		}
+		return null;
 	}
 
 }

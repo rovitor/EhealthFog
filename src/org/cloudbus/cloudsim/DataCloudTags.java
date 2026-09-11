@@ -8,468 +8,446 @@
 
 package org.cloudbus.cloudsim;
 
+import org.cloudbus.cloudsim.core.CloudSimTags;
+
 /**
  * This class contains additional tags for the DataCloud functionalities, such as file information
  * retrieval, file transfers, and storage info.
  * 
  * @author Uros Cibej
  * @author Anthony Sulistio
+ * @author Remo Andreoli
  * @since CloudSim Toolkit 1.0
  */
-public final class DataCloudTags {
-
-	// to prevent a conflict with the existing CloudSimTags values
-	private static final int BASE = 400;        // for other general tags
-
-	private static final int RM_BASE = 500;     // for Replica Manager tags
-
-	private static final int CTLG_BASE = 600;   // for catalogue tags
-
+public enum DataCloudTags implements CloudSimTags {
 	// ////////// GENERAL TAGS
 
-	/** Default Maximum Transmission Unit (MTU) of a link in bytes */
-	public static final int DEFAULT_MTU = 1500;
-
-	/** The default packet size (in byte) for sending events to other entity. */
-	public static final int PKT_SIZE = DEFAULT_MTU * 100;  // in bytes
-
-	/** The default storage size (10 GByte) */
-	public static final int DEFAULT_STORAGE_SIZE = 10000000; // 10 GB in bytes
-
-	/** Registers a Replica Catalogue (RC) entity to a Data GIS */
-	public static final int REGISTER_REPLICA_CTLG = BASE + 1;
+	/** Registers a Replica Catalogue (RC) entity to a Data GIS. */
+	REGISTER_REPLICA_CTLG,
 
 	/**
 	 * Denotes a list of all Replica Catalogue (RC) entities that are listed in this regional Data
 	 * GIS entity. This tag should be called from a user to Data GIS.
 	 */
-	public static final int INQUIRY_LOCAL_RC_LIST = BASE + 2;
+	INQUIRY_LOCAL_RC_LIST,
 
 	/**
 	 * Denotes a list of Replica Catalogue (RC) entities that are listed in other regional Data GIS
 	 * entities. This tag should be called from a user to Data GIS.
 	 */
-	public static final int INQUIRY_GLOBAL_RC_LIST = BASE + 3;
+	INQUIRY_GLOBAL_RC_LIST,
 
 	/**
 	 * Denotes a list of Replica Catalogue IDs. This tag should be called from a Regional Data GIS
 	 * to another
 	 */
-	public static final int INQUIRY_RC_LIST = BASE + 4;
+	INQUIRY_RC_LIST,
 
 	/**
 	 * Denotes a result regarding to a list of Replica Catalogue IDs. This tag should be called from
 	 * a Regional Data GIS to a sender Regional Data GIS.
 	 */
-	public static final int INQUIRY_RC_RESULT = BASE + 5;
+	INQUIRY_RC_RESULT,
 
 	/**
 	 * Denotes the submission of a DataCloudlet. This tag is normally used between user and
 	 * DataCloudResource entity.
 	 */
-	public static final int DATAcloudlet_SUBMIT = BASE + 6;
+	DATAcloudlet_SUBMIT,
 
 	// ////////// REPLICA MANAGER TAGS
 
 	// ***********************User <--> RM******************************//
 
 	/**
-	 * Requests for a file that is stored on the local storage(s).<br>
-	 * The format of this request is Object[2] = {String lfn, Integer senderID}.<br>
+	 * Requests for a file that is stored on the local storage(s).
+	 * <br/>The format of this request is Object[2] = {String lfn, Integer senderID}.<br/>
 	 * The reply tag name is {@link #FILE_DELIVERY}.
 	 */
-	public static final int FILE_REQUEST = RM_BASE + 1;
+	FILE_REQUEST,
 
 	/**
 	 * Sends the file to the requester. The format of the reply is File or null if error happens
 	 */
-	public static final int FILE_DELIVERY = RM_BASE + 2;
+	FILE_DELIVERY,
 
 	// /////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Requests for a master file to be added to the local storage(s).<br>
-	 * The format of this request is Object[2] = {File obj, Integer senderID}.<br>
+	 * Requests for a master file to be added to the local storage(s).
+	 * <br/>The format of this request is Object[2] = {File obj, Integer senderID}.<br/>
 	 * The reply tag name is {@link #FILE_ADD_MASTER_RESULT}.
 	 */
-	public static final int FILE_ADD_MASTER = RM_BASE + 10;
+	FILE_ADD_MASTER,
 
 	/**
-	 * Sends the result of adding a master file back to sender.<br>
-	 * The format of the reply is Object[3] = {String lfn, Integer uniqueID, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of FILE_ADD_XXXX where XXXX means the error/success
+	 * Sends the result of adding a master file back to sender.
+	 * <br/>The format of the reply is Object[3] = {String lfn, Integer uniqueID, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of FILE_ADD_XXXX where XXXX means the error/success
+	 * message.
+	 */
+	FILE_ADD_MASTER_RESULT,
+
+	/**
+	 * Requests for a replica file to be added from the local storage(s).
+	 * <br/>The format of this request is Object[2] = {File obj, Integer senderID}.
+	 * <br/>The reply tag name is {@link #FILE_ADD_REPLICA_RESULT}.
+	 */
+	FILE_ADD_REPLICA,
+
+	/**
+	 * Sends the result of adding a replica file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of FILE_ADD_XXXX where XXXX means the error/success
 	 * message
 	 */
-	public static final int FILE_ADD_MASTER_RESULT = RM_BASE + 11;
+	FILE_ADD_REPLICA_RESULT,
 
-	/**
-	 * Requests for a replica file to be added from the local storage(s).<br>
-	 * The format of this request is Object[2] = {File obj, Integer senderID}.<br>
-	 * The reply tag name is {@link #FILE_ADD_REPLICA_RESULT}.
-	 */
-	public static final int FILE_ADD_REPLICA = RM_BASE + 12;
+	/** Denotes that file addition is successful. */
+	FILE_ADD_SUCCESSFUL,
 
-	/**
-	 * Sends the result of adding a replica file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of FILE_ADD_XXXX where XXXX means the error/success
-	 * message
-	 */
-	public static final int FILE_ADD_REPLICA_RESULT = RM_BASE + 13;
+	/** Denotes that file addition is failed because the storage is full. */
+	FILE_ADD_ERROR_STORAGE_FULL,
 
-	/** Denotes that file addition is successful */
-	public static final int FILE_ADD_SUCCESSFUL = RM_BASE + 20;
-
-	/** Denotes that file addition is failed because the storage is full */
-	public static final int FILE_ADD_ERROR_STORAGE_FULL = RM_BASE + 21;
-
-	/** Denotes that file addition is failed because the given file is empty */
-	public static final int FILE_ADD_ERROR_EMPTY = RM_BASE + 22;
+	/** Denotes that file addition is failed because the given file is empty. */
+	FILE_ADD_ERROR_EMPTY,
 
 	/**
 	 * Denotes that file addition is failed because the file already exists in the catalogue and it
-	 * is read-only file
+	 * is read-only file.
 	 */
-	public static final int FILE_ADD_ERROR_EXIST_READ_ONLY = RM_BASE + 23;
+	FILE_ADD_ERROR_EXIST_READ_ONLY,
 
-	/** Denotes that file addition is failed due to an unknown error */
-	public static final int FILE_ADD_ERROR = RM_BASE + 24;
+	/** Denotes that file addition is failed due to an unknown error. */
+	FILE_ADD_ERROR,
 
 	/**
-	 * Denotes that file addition is failed because access/permission denied or not authorized
+	 * Denotes that file addition is failed because access/permission denied or not authorized.
 	 */
-	public static final int FILE_ADD_ERROR_ACCESS_DENIED = RM_BASE + 25;
+	FILE_ADD_ERROR_ACCESS_DENIED,
 
 	// /////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Requests for a master file to be deleted from the local storage(s).<br>
-	 * The format of this request is Object[2] = {String lfn, Integer senderID}.<br>
-	 * The reply tag name is {@link #FILE_DELETE_MASTER_RESULT}.
+	 * Requests for a master file to be deleted from the local storage(s).
+	 * <br/>The format of this request is Object[2] = {String lfn, Integer senderID}.
+	 * <br/>The reply tag name is {@link #FILE_DELETE_MASTER_RESULT}.
 	 */
-	public static final int FILE_DELETE_MASTER = RM_BASE + 30;
+	FILE_DELETE_MASTER,
 
 	/**
-	 * Sends the result of deleting a master file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of FILE_DELETE_XXXX where XXXX means the error/success
+	 * Sends the result of deleting a master file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of FILE_DELETE_XXXX where XXXX means the error/success
 	 * message
 	 */
-	public static final int FILE_DELETE_MASTER_RESULT = RM_BASE + 31;
+	FILE_DELETE_MASTER_RESULT,
 
 	/**
-	 * Requests for a replica file to be deleted from the local storage(s).<br>
-	 * The format of this request is Object[2] = {String lfn, Integer senderID}.<br>
-	 * The reply tag name is {@link #FILE_DELETE_REPLICA_RESULT}.
+	 * Requests for a replica file to be deleted from the local storage(s).
+	 * <br/>The format of this request is Object[2] = {String lfn, Integer senderID}.
+	 * <br/>The reply tag name is {@link #FILE_DELETE_REPLICA_RESULT}.
 	 */
-	public static final int FILE_DELETE_REPLICA = RM_BASE + 32;
+	FILE_DELETE_REPLICA,
 
 	/**
-	 * Sends the result of deleting a replica file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of FILE_DELETE_XXXX where XXXX means the error/success
+	 * Sends the result of deleting a replica file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of FILE_DELETE_XXXX where XXXX means the error/success
 	 * message
 	 */
-	public static final int FILE_DELETE_REPLICA_RESULT = RM_BASE + 33;
+	FILE_DELETE_REPLICA_RESULT,
 
-	/** Denotes that file deletion is successful */
-	public static final int FILE_DELETE_SUCCESSFUL = RM_BASE + 40;
+	/** Denotes that file deletion is successful. */
+	FILE_DELETE_SUCCESSFUL,
 
-	/** Denotes that file deletion is failed due to an unknown error */
-	public static final int FILE_DELETE_ERROR = RM_BASE + 41;
+	/** Denotes that file deletion is failed due to an unknown error. */
+	FILE_DELETE_ERROR,
 
-	/** Denotes that file deletion is failed because it is a read-only file */
-	public static final int FILE_DELETE_ERROR_READ_ONLY = RM_BASE + 42;
+	/** Denotes that file deletion is failed because it is a read-only file. */
+	FILE_DELETE_ERROR_READ_ONLY,
 
 	/**
 	 * Denotes that file deletion is failed because the file does not exist in the storage nor
-	 * catalogue
+	 * catalogue.
 	 */
-	public static final int FILE_DELETE_ERROR_DOESNT_EXIST = RM_BASE + 43;
+	FILE_DELETE_ERROR_DOESNT_EXIST,
 
 	/**
-	 * Denotes that file deletion is failed because it is currently used by others
+	 * Denotes that file deletion is failed because it is currently used by others.
 	 */
-	public static final int FILE_DELETE_ERROR_IN_USE = RM_BASE + 44;
+	FILE_DELETE_ERROR_IN_USE,
 
 	/**
-	 * Denotes that file deletion is failed because access/permission denied or not authorized
+	 * Denotes that file deletion is failed because access/permission denied or not authorized.
 	 */
-	public static final int FILE_DELETE_ERROR_ACCESS_DENIED = RM_BASE + 45;
+	FILE_DELETE_ERROR_ACCESS_DENIED,
 
 	// /////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Requests for a file to be modified from the local storage(s).<br>
-	 * The format of this request is Object[2] = {File obj, Integer senderID}.<br>
-	 * The reply tag name is {@link #FILE_MODIFY_RESULT}.
+	 * Requests for a file to be modified from the local storage(s).
+	 * <br/>The format of this request is Object[2] = {File obj, Integer senderID}.
+	 * <br/>The reply tag name is {@link #FILE_MODIFY_RESULT}.
 	 */
-	public static final int FILE_MODIFY = RM_BASE + 50;
+	FILE_MODIFY,
 
 	/**
-	 * Sends the result of deleting a file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of FILE_MODIFY_XXXX where XXXX means the error/success
+	 * Sends the result of deleting a file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of FILE_MODIFY_XXXX where XXXX means the error/success
 	 * message
 	 */
-	public static final int FILE_MODIFY_RESULT = RM_BASE + 51;
+	FILE_MODIFY_RESULT,
 
-	/** Denotes that file modification is successful */
-	public static final int FILE_MODIFY_SUCCESSFUL = RM_BASE + 60;
+	/** Denotes that file modification is successful. */
+	FILE_MODIFY_SUCCESSFUL,
 
-	/** Denotes that file modification is failed due to an unknown error */
-	public static final int FILE_MODIFY_ERROR = RM_BASE + 61;
-
-	/**
-	 * Denotes that file modification is failed because it is a read-only file
-	 */
-	public static final int FILE_MODIFY_ERROR_READ_ONLY = RM_BASE + 62;
+	/** Denotes that file modification is failed due to an unknown error. */
+	FILE_MODIFY_ERROR,
 
 	/**
-	 * Denotes that file modification is failed because the file does not exist
+	 * Denotes that file modification is failed because it is a read-only file.
 	 */
-	public static final int FILE_MODIFY_ERROR_DOESNT_EXIST = RM_BASE + 63;
+	FILE_MODIFY_ERROR_READ_ONLY,
 
 	/**
-	 * Denotes that file modification is failed because the file is currently used by others
+	 * Denotes that file modification is failed because the file does not exist.
 	 */
-	public static final int FILE_MODIFY_ERROR_IN_USE = RM_BASE + 64;
+	FILE_MODIFY_ERROR_DOESNT_EXIST,
 
 	/**
-	 * Denotes that file modification is failed because access/permission denied or not authorized
+	 * Denotes that file modification is failed because the file is currently used by others.
 	 */
-	public static final int FILE_MODIFY_ERROR_ACCESS_DENIED = RM_BASE + 65;
+	FILE_MODIFY_ERROR_IN_USE,
+
+	/**
+	 * Denotes that file modification is failed because access/permission denied or not authorized.
+	 */
+	FILE_MODIFY_ERROR_ACCESS_DENIED,
 
 	// ////////// REPLICA CATALOGUE TAGS
 
 	// ***********************User<-->RC******************************//
 
 	/**
-	 * Denotes the request for a location of a replica file.<br>
-	 * The format of this request is Object[2] = {String lfn, Integer senderID}.<br>
-	 * The reply tag name is {@link #CTLG_REPLICA_DELIVERY}.<br>
-	 * NOTE: This request only ask for one location only not all.
+	 * Denotes the request for a location of a replica file.
+	 * <br/>The format of this request is Object[2] = {String lfn, Integer senderID}.
+	 * <br/>The reply tag name is {@link #CTLG_REPLICA_DELIVERY}.
+	 * <br/>NOTE: This request only ask for one location only not all.
 	 */
-	public static final int CTLG_GET_REPLICA = CTLG_BASE + 1;
+	CTLG_GET_REPLICA,
 
 	/**
-	 * Sends the result for a location of a replica file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, Integer resourceID}.<br>
-	 * NOTE: The resourceID could be <tt>-1</tt> if not found.
+	 * Sends the result for a location of a replica file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, Integer resourceID}.
+	 * <br/>NOTE: The resourceID could be <tt>-1</tt> if not found.
 	 */
-	public static final int CTLG_REPLICA_DELIVERY = CTLG_BASE + 2;
+	CTLG_REPLICA_DELIVERY,
 
 	/**
-	 * Denotes the request for all locations of a replica file.<br>
-	 * The format of this request is Object[2] = {String lfn, Integer senderID}.<br>
-	 * The reply tag name is {@link #CTLG_REPLICA_LIST_DELIVERY}.
+	 * Denotes the request for all locations of a replica file.
+	 * <br/>The format of this request is Object[2] = {String lfn, Integer senderID}.
+	 * <br/>The reply tag name is {@link #CTLG_REPLICA_LIST_DELIVERY}.
 	 */
-	public static final int CTLG_GET_REPLICA_LIST = CTLG_BASE + 3;
+	CTLG_GET_REPLICA_LIST,
 
 	/**
-	 * Sends the result for all locations of a replica file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, List locationList}.<br>
-	 * NOTE: The locationList could be <tt>null</tt> if not found.
+	 * Sends the result for all locations of a replica file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, List locationList}.
+	 * <br/>NOTE: The locationList could be <tt>null</tt> if not found.
 	 */
-	public static final int CTLG_REPLICA_LIST_DELIVERY = CTLG_BASE + 4;
+	CTLG_REPLICA_LIST_DELIVERY,
 
 	/**
-	 * Denotes the request to get the attribute of a file.<br>
-	 * The format of this request is Object[2] = {String lfn, Integer senderID}.<br>
-	 * The reply tag name is {@link #CTLG_FILE_ATTR_DELIVERY}.
+	 * Denotes the request to get the attribute of a file.
+	 * <br/>The format of this request is Object[2] = {String lfn, Integer senderID}.
+	 * <br/>The reply tag name is {@link #CTLG_FILE_ATTR_DELIVERY}.
 	 */
-	public static final int CTLG_GET_FILE_ATTR = CTLG_BASE + 5;
+	CTLG_GET_FILE_ATTR,
 
 	/**
-	 * Sends the result for a file attribute back to sender.<br>
-	 * The format of the reply is {FileAttribute fileAttr}.<br>
-	 * NOTE: The fileAttr could be <tt>null</tt> if not found.
+	 * Sends the result for a file attribute back to sender.
+	 * <br/>The format of the reply is {FileAttribute fileAttr}
+	 * <br/>NOTE: The fileAttr could be <tt>null</tt> if not found.
 	 */
-	public static final int CTLG_FILE_ATTR_DELIVERY = CTLG_BASE + 6;
+	CTLG_FILE_ATTR_DELIVERY,
 
 	/**
-	 * Denotes the request to get a list of file attributes based on the given filter.<br>
-	 * The format of this request is Object[2] = {Filter filter, Integer senderID}.<br>
-	 * The reply tag name is {@link #CTLG_FILTER_DELIVERY}.
+	 * Denotes the request to get a list of file attributes based on the given filter.
+	 * <br/>The format of this request is Object[2] = {Filter filter, Integer senderID}
+	 * <br/>The reply tag name is {@link #CTLG_FILTER_DELIVERY}.
 	 */
-	public static final int CTLG_FILTER = CTLG_BASE + 7;
+	CTLG_FILTER,
 
 	/**
-	 * Sends the result for a list of file attributes back to sender.<br>
-	 * The format of the reply is {List attrList}.<br>
-	 * NOTE: The attrList could be <tt>null</tt> if not found.
+	 * Sends the result for a list of file attributes back to sender.
+	 * <br/>The format of the reply is {List attrList}.
+	 * <br/>NOTE: The attrList could be <tt>null</tt> if not found.
 	 */
-	public static final int CTLG_FILTER_DELIVERY = CTLG_BASE + 8;
+	CTLG_FILTER_DELIVERY,
 
 	// ***********************RM<-->RC******************************//
 
 	/**
-	 * Denotes the request to register / add a master file to the Replica Catalogue.<br>
-	 * The format of this request is Object[3] = {String filename, FileAttribute attr, Integer
-	 * resID}.<br>
-	 * The reply tag name is {@link #CTLG_ADD_MASTER_RESULT}.
+	 * Denotes the request to register / add a master file to the Replica Catalogue.
+	 * <br/>The format of this request is Object[3] = {String filename, FileAttribute attr, Integer
+	 * resID}.
+	 * <br/>The reply tag name is {@link #CTLG_ADD_MASTER_RESULT}.
 	 */
-	public static final int CTLG_ADD_MASTER = CTLG_BASE + 10;
+	CTLG_ADD_MASTER,
 
 	/**
-	 * Sends the result of registering a master file back to sender.<br>
-	 * The format of the reply is Object[3] = {String filename, Integer uniqueID, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of CTLG_ADD_MASTER_XXXX where XXXX means the error/success
+	 * Sends the result of registering a master file back to sender.
+	 * <br/>The format of the reply is Object[3] = {String filename, Integer uniqueID, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of CTLG_ADD_MASTER_XXXX where XXXX means the error/success
 	 * message
 	 */
-	public static final int CTLG_ADD_MASTER_RESULT = CTLG_BASE + 11;
+	CTLG_ADD_MASTER_RESULT,
 
-	/** Denotes that master file addition is successful */
-	public static final int CTLG_ADD_MASTER_SUCCESSFUL = CTLG_BASE + 12;
+	/** Denotes that master file addition is successful. */
+	CTLG_ADD_MASTER_SUCCESSFUL,
 
-	/** Denotes that master file addition is failed due to an unknown error */
-	public static final int CTLG_ADD_MASTER_ERROR = CTLG_BASE + 13;
+	/** Denotes that master file addition is failed due to an unknown error. */
+	CTLG_ADD_MASTER_ERROR,
 
 	/**
-	 * Denotes that master file addition is failed due to the catalogue is full
+	 * Denotes that master file addition is failed due to the catalogue is full.
 	 */
-	public static final int CTLG_ADD_MASTER_ERROR_FULL = CTLG_BASE + 14;
+	CTLG_ADD_MASTER_ERROR_FULL,
 
 	// /////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Denotes the request to de-register / delete a master file from the Replica Catalogue.<br>
-	 * The format of this request is Object[2] = {String lfn, Integer resourceID}.<br>
-	 * The reply tag name is {@link #CTLG_DELETE_MASTER_RESULT}.
+	 * Denotes the request to de-register / delete a master file from the Replica Catalogue.
+	 * <br/>The format of this request is Object[2] = {String lfn, Integer resourceID}.
+	 * <br/>The reply tag name is {@link #CTLG_DELETE_MASTER_RESULT}.
 	 */
-	public static final int CTLG_DELETE_MASTER = CTLG_BASE + 20;
+	CTLG_DELETE_MASTER,
 
 	/**
-	 * Sends the result of de-registering a master file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of CTLG_DELETE_MASTER_XXXX where XXXX means the
+	 * Sends the result of de-registering a master file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of CTLG_DELETE_MASTER_XXXX where XXXX means the
 	 * error/success message
 	 */
-	public static final int CTLG_DELETE_MASTER_RESULT = CTLG_BASE + 21;
+	CTLG_DELETE_MASTER_RESULT,
 
-	/** Denotes that master file deletion is successful */
-	public static final int CTLG_DELETE_MASTER_SUCCESSFUL = CTLG_BASE + 22;
+	/** Denotes that master file deletion is successful. */
+	CTLG_DELETE_MASTER_SUCCESSFUL,
 
-	/** Denotes that master file deletion is failed due to an unknown error */
-	public static final int CTLG_DELETE_MASTER_ERROR = CTLG_BASE + 23;
+	/** Denotes that master file deletion is failed due to an unknown error. */
+	CTLG_DELETE_MASTER_ERROR,
 
 	/**
-	 * Denotes that master file deletion is failed because the file does not exist in the catalogue
+	 * Denotes that master file deletion is failed because the file does not exist in the catalogue.
 	 */
-	public static final int CTLG_DELETE_MASTER_DOESNT_EXIST = CTLG_BASE + 24;
+	CTLG_DELETE_MASTER_DOESNT_EXIST,
 
 	/**
 	 * Denotes that master file deletion is failed because replica files are still in the catalogue.
 	 * All replicas need to be deleted first.
 	 */
-	public static final int CTLG_DELETE_MASTER_REPLICAS_EXIST = CTLG_BASE + 25;
+	CTLG_DELETE_MASTER_REPLICAS_EXIST,
 
 	// /////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Denotes the request to register / add a replica file to the Replica Catalogue.<br>
-	 * The format of this request is Object[2] = {String lfn, Integer resourceID}.<br>
-	 * The reply tag name is {@link #CTLG_ADD_REPLICA_RESULT}.
+	 * Denotes the request to register / add a replica file to the Replica Catalogue.
+	 * <br/>The format of this request is Object[2] = {String lfn, Integer resourceID}.
+	 * <br/>The reply tag name is {@link #CTLG_ADD_REPLICA_RESULT}.
 	 */
-	public static final int CTLG_ADD_REPLICA = CTLG_BASE + 30;
+	CTLG_ADD_REPLICA,
 
 	/**
-	 * Sends the result of registering a replica file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of CTLG_ADD_REPLICA_XXXX where XXXX means the
+	 * Sends the result of registering a replica file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of CTLG_ADD_REPLICA_XXXX where XXXX means the
 	 * error/success message
 	 */
-	public static final int CTLG_ADD_REPLICA_RESULT = CTLG_BASE + 31;
+	CTLG_ADD_REPLICA_RESULT,
 
-	/** Denotes that replica file addition is successful */
-	public static final int CTLG_ADD_REPLICA_SUCCESSFUL = CTLG_BASE + 32;
+	/** Denotes that replica file addition is successful. */
+	CTLG_ADD_REPLICA_SUCCESSFUL,
 
-	/** Denotes that replica file addition is failed due to an unknown error */
-	public static final int CTLG_ADD_REPLICA_ERROR = CTLG_BASE + 33;
+	/** Denotes that replica file addition is failed due to an unknown error. */
+	CTLG_ADD_REPLICA_ERROR,
 
 	/**
 	 * Denotes that replica file addition is failed because the given file name does not exist in
-	 * the catalogue
+	 * the catalogue.
 	 */
-	public static final int CTLG_ADD_REPLICA_ERROR_DOESNT_EXIST = CTLG_BASE + 34;
+	CTLG_ADD_REPLICA_ERROR_DOESNT_EXIST,
 
 	/**
-	 * Denotes that replica file addition is failed due to the catalogue is full
+	 * Denotes that replica file addition is failed due to the catalogue is full.
 	 */
-	public static final int CTLG_ADD_REPLICA_ERROR_FULL = CTLG_BASE + 35;
+	CTLG_ADD_REPLICA_ERROR_FULL,
 
 	// /////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Denotes the request to de-register / delete a replica file from the Replica Catalogue.<br>
-	 * The format of this request is Object[2] = {String lfn, Integer resourceID}.<br>
+	 * Denotes the request to de-register / delete a replica file from the Replica Catalogue.<br/>
+	 * The format of this request is Object[2] = {String lfn, Integer resourceID}.<br/>
 	 * The reply tag name is {@link #CTLG_DELETE_REPLICA_RESULT}.
 	 */
-	public static final int CTLG_DELETE_REPLICA = CTLG_BASE + 40;
+	CTLG_DELETE_REPLICA,
 
 	/**
-	 * Sends the result of de-registering a replica file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of CTLG_DELETE_REPLICA_XXXX where XXXX means the
+	 * Sends the result of de-registering a replica file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of CTLG_DELETE_REPLICA_XXXX where XXXX means the
 	 * error/success message
 	 */
-	public static final int CTLG_DELETE_REPLICA_RESULT = CTLG_BASE + 41;
+	CTLG_DELETE_REPLICA_RESULT,
 
-	/** Denotes that replica file deletion is successful */
-	public static final int CTLG_DELETE_REPLICA_SUCCESSFUL = CTLG_BASE + 42;
+	/** Denotes that replica file deletion is successful. */
+	CTLG_DELETE_REPLICA_SUCCESSFUL,
 
-	/** Denotes that replica file deletion is failed due to an unknown error */
-	public static final int CTLG_DELETE_REPLICA_ERROR = CTLG_BASE + 43;
+	/** Denotes that replica file deletion is failed due to an unknown error. */
+	CTLG_DELETE_REPLICA_ERROR,
 
 	/**
-	 * Denotes that replica file deletion is failed because the file does not exist in the catalogue
+	 * Denotes that replica file deletion is failed because the file does not exist in the catalogue.
 	 */
-	public static final int CTLG_DELETE_REPLICA_ERROR_DOESNT_EXIST = CTLG_BASE + 44;
+	CTLG_DELETE_REPLICA_ERROR_DOESNT_EXIST,
 
 	// /////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Denotes the request to modify an existing master file information stored in the Replica
-	 * Catalogue.<br>
-	 * The format of this request is Object[3] = {String filename, FileAttribute attr, Integer
-	 * resID}.<br>
-	 * The reply tag name is {@link #CTLG_MODIFY_MASTER_RESULT}.
+	 * Catalogue.
+	 * <br/>The format of this request is Object[3] = {String filename, FileAttribute attr, Integer
+	 * resID}.
+	 * <br/>The reply tag name is {@link #CTLG_MODIFY_MASTER_RESULT}.
 	 */
-	public static final int CTLG_MODIFY_MASTER = CTLG_BASE + 50;
+	CTLG_MODIFY_MASTER,
 
 	/**
-	 * Sends the result of modifying a master file back to sender.<br>
-	 * The format of the reply is Object[2] = {String lfn, Integer resultID}.<br>
-	 * NOTE: The result id is in the form of CTLG_MODIFY_MASTER_XXXX where XXXX means the
+	 * Sends the result of modifying a master file back to sender.
+	 * <br/>The format of the reply is Object[2] = {String lfn, Integer resultID}.
+	 * <br/>NOTE: The result id is in the form of CTLG_MODIFY_MASTER_XXXX where XXXX means the
 	 * error/success message
 	 */
-	public static final int CTLG_MODIFY_MASTER_RESULT = CTLG_BASE + 51;
+	CTLG_MODIFY_MASTER_RESULT,
 
-	/** Denotes that master file deletion is successful */
-	public static final int CTLG_MODIFY_MASTER_SUCCESSFUL = CTLG_BASE + 52;
+	/** Denotes that master file deletion is successful. */
+	CTLG_MODIFY_MASTER_SUCCESSFUL,
 
 	/**
-	 * Denotes that master file modification is failed due to an unknown error
+	 * Denotes that master file modification is failed due to an unknown error.
 	 */
-	public static final int CTLG_MODIFY_MASTER_ERROR = CTLG_BASE + 53;
+	CTLG_MODIFY_MASTER_ERROR,
 
 	/**
 	 * Denotes that master file modification is failed because the file does not exist in the
-	 * catalogue
+	 * catalogue.
 	 */
-	public static final int CTLG_MODIFY_MASTER_ERROR_DOESNT_EXIST = CTLG_BASE + 54;
+	CTLG_MODIFY_MASTER_ERROR_DOESNT_EXIST,
 
 	/**
 	 * Denotes that master file modification is failed because the file attribute is set to a
-	 * read-only
+	 * read-only.
 	 */
-	public static final int CTLG_MODIFY_MASTER_ERROR_READ_ONLY = CTLG_BASE + 55;
-
-	// /////////////////////////////////////////////////////////////////////
-
-	/** Private Constructor */
-	private DataCloudTags() {
-		throw new UnsupportedOperationException("DataCloudTags cannot be instantiated");
-	}
-
+	CTLG_MODIFY_MASTER_ERROR_READ_ONLY
 }

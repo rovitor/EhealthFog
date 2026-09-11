@@ -167,6 +167,8 @@ public class ClusteringController extends SimEntity {
                 System.exit(0);
                 break;
 
+            default:
+                throw new IllegalStateException("Unexpected value: " + ev.getTag());
         }
     }
 

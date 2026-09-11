@@ -18,6 +18,7 @@ import org.cloudbus.cloudsim.Pe;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmScheduler;
 import org.cloudbus.cloudsim.core.CloudSim;
+import org.cloudbus.cloudsim.core.GuestEntity;
 
 /**
  * VmSchedulerSpaceShared is a VMM allocation policy that allocates one or more Pe to a VM, and
@@ -54,7 +55,7 @@ public class VmSchedulerSpaceSharedEnergy extends VmScheduler {
 	 * java.util.List)
 	 */
 	@Override
-	public boolean allocatePesForVm(Vm vm, List<Double> mipsShare) {
+	public boolean allocatePesForGuest(GuestEntity vm, List<Double> mipsShare) {
 		// if there is no enough free PEs, fails
 		if (getFreePes().size() < mipsShare.size()) {
 			return false;
@@ -91,7 +92,7 @@ public class VmSchedulerSpaceSharedEnergy extends VmScheduler {
 	 * @see org.cloudbus.cloudsim.VmScheduler#deallocatePesForVm(org.cloudbus.cloudsim.Vm)
 	 */
 	@Override
-	public void deallocatePesForVm(Vm vm) {
+	public void deallocatePesForGuest(GuestEntity vm) {
 		getFreePes().addAll(getPeAllocationMap().get(vm.getUid()));
 		getPeAllocationMap().remove(vm.getUid());
 

@@ -159,7 +159,7 @@ public class PhysicalTopologyGenerator {
 			obj.put("storage", o.storage);
 			obj.put("pes", o.pe);
 			obj.put("mips", o.mips);
-			obj.put("ram", new Integer(o.ram));
+			obj.put("ram", Integer.valueOf(o.ram));
 			obj.put("bw", o.bw);
 			return obj;
 		}

@@ -8,30 +8,34 @@
 
 package org.cloudbus.cloudsim.lists;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.cloudbus.cloudsim.Host;
+import org.cloudbus.cloudsim.core.HostEntity;
+import org.cloudbus.cloudsim.power.PowerHost;
 
 /**
- * HostList is a collection of operations on lists of hosts.
+ * HostList is a collection of operations on lists of hosts (PMs).
  * 
  * @author Anton Beloglazov
+ * @author Remo Andreoli
  * @since CloudSim Toolkit 2.0
  */
 public class HostList {
 
 	/**
-	 * Gets the Machine object for a particular ID.
+	 * Gets a {@link HostEntity} with a given id.
 	 * 
 	 * @param <T> the generic type
-	 * @param hostList the host list
+	 * @param hostList the list of existing hosts
 	 * @param id the host ID
-	 * @return the Machine object or <tt>null</tt> if no machine exists
-	 * @see gridsim.Machine
+	 * @return a HostEntity with the given ID or $null if not found
+         * 
 	 * @pre id >= 0
 	 * @post $none
 	 */
-	public static <T extends Host> T getById(List<T> hostList, int id) {
+	public static <T extends HostEntity> T getById(List<T> hostList, int id) {
 		for (T host : hostList) {
 			if (host.getId() == id) {
 				return host;
@@ -41,32 +45,32 @@ public class HostList {
 	}
 
 	/**
-	 * Gets the total number of PEs for all Machines.
+	 * Gets the total number of PEs for all Hosts.
 	 * 
 	 * @param <T> the generic type
-	 * @param hostList the host list
-	 * @return number of PEs
+	 * @param hostList the list of existing hosts
+	 * @return total number of PEs for all PMs
 	 * @pre $none
 	 * @post $result >= 0
 	 */
-	public static <T extends Host> int getNumberOfPes(List<T> hostList) {
+	public static <T extends HostEntity> int getNumberOfPes(List<T> hostList) {
 		int numberOfPes = 0;
 		for (T host : hostList) {
-			numberOfPes += host.getPeList().size();
+			numberOfPes += host.getNumberOfPes();
 		}
 		return numberOfPes;
 	}
 
 	/**
-	 * Gets the total number of <tt>FREE</tt> or non-busy PEs for all Machines.
+	 * Gets the total number of <tt>FREE</tt> (non-busy) PEs for all Hosts.
 	 * 
 	 * @param <T> the generic type
-	 * @param hostList the host list
-	 * @return number of PEs
+	 * @param hostList the list of existing hosts
+	 * @return total number of free PEs
 	 * @pre $none
 	 * @post $result >= 0
 	 */
-	public static <T extends Host> int getNumberOfFreePes(List<T> hostList) {
+	public static <T extends HostEntity> int getNumberOfFreePes(List<T> hostList) {
 		int numberOfFreePes = 0;
 		for (T host : hostList) {
 			numberOfFreePes += PeList.getNumberOfFreePes(host.getPeList());
@@ -75,15 +79,15 @@ public class HostList {
 	}
 
 	/**
-	 * Gets the total number of <tt>BUSY</tt> PEs for all Machines.
+	 * Gets the total number of <tt>BUSY</tt> PEs for all Hosts.
 	 * 
 	 * @param <T> the generic type
-	 * @param hostList the host list
-	 * @return number of PEs
+	 * @param hostList the list of existing hosts
+	 * @return total number of busy PEs
 	 * @pre $none
 	 * @post $result >= 0
 	 */
-	public static <T extends Host> int getNumberOfBusyPes(List<T> hostList) {
+	public static <T extends HostEntity> int getNumberOfBusyPes(List<T> hostList) {
 		int numberOfBusyPes = 0;
 		for (T host : hostList) {
 			numberOfBusyPes += PeList.getNumberOfBusyPes(host.getPeList());
@@ -92,29 +96,29 @@ public class HostList {
 	}
 
 	/**
-	 * Gets a Machine with free Pe.
+	 * Gets the first host with free PEs.
 	 * 
 	 * @param <T> the generic type
-	 * @param hostList the host list
-	 * @return a machine object or <tt>null</tt> if not found
+	 * @param hostList the list of existing hosts
+	 * @return a HostEntity object or <tt>null</tt> if not found
 	 * @pre $none
 	 * @post $none
 	 */
-	public static <T extends Host> T getHostWithFreePe(List<T> hostList) {
+	public static <T extends HostEntity> T getHostWithFreePe(List<T> hostList) {
 		return getHostWithFreePe(hostList, 1);
 	}
 
 	/**
-	 * Gets a Machine with a specified number of free Pe.
+	 * Gets the first HostEntity with a specified number of free PEs.
 	 * 
 	 * @param <T> the generic type
-	 * @param hostList the host list
+	 * @param hostList the list of existing hosts
 	 * @param pesNumber the pes number
-	 * @return a machine object or <tt>null</tt> if not found
+	 * @return a HostEntity object or <tt>null</tt> if not found
 	 * @pre $none
 	 * @post $none
 	 */
-	public static <T extends Host> T getHostWithFreePe(List<T> hostList, int pesNumber) {
+	public static <T extends HostEntity> T getHostWithFreePe(List<T> hostList, int pesNumber) {
 		for (T host : hostList) {
 			if (PeList.getNumberOfFreePes(host.getPeList()) >= pesNumber) {
 				return host;
@@ -124,25 +128,49 @@ public class HostList {
 	}
 
 	/**
-	 * Sets the particular Pe status on a Machine.
+	 * Sets the status of a particular PE on a given HostEntity.
 	 * 
 	 * @param <T> the generic type
-	 * @param hostList the host list
-	 * @param status Pe status, either <tt>Pe.FREE</tt> or <tt>Pe.BUSY</tt>
+	 * @param hostList the list of existing hosts
+	 * @param status the PE status, either <tt>Pe.FREE</tt> or <tt>Pe.BUSY</tt>
 	 * @param hostId the host id
-	 * @param peId the pe id
-	 * @return <tt>true</tt> if the Pe status has changed, <tt>false</tt> otherwise (Machine id or
-	 *         Pe id might not be exist)
-	 * @pre machineID >= 0
-	 * @pre peID >= 0
+	 * @param peId the id of the PE to set the status
+	 * @return <tt>true</tt> if the PE status has changed, <tt>false</tt> otherwise (host id or
+	 *         PE id might not be exist)
+	 * @pre hostId >= 0
+	 * @pre peId >= 0
 	 * @post $none
 	 */
-	public static <T extends Host> boolean setPeStatus(List<T> hostList, int status, int hostId, int peId) {
+	public static <T extends HostEntity> boolean setPeStatus(List<T> hostList, int status, int hostId, int peId) {
 		T host = getById(hostList, hostId);
 		if (host == null) {
 			return false;
 		}
 		return host.setPeStatus(peId, status);
 	}
+
+    /**
+     * Sort by cpu utilization.
+     *
+     * @param hostList the vm list
+     */
+    public static <T extends HostEntity> void sortByCpuUtilization(List<T> hostList) {
+        hostList.sort((a, b) -> {
+            Double aUtilization = ((PowerHost) a).getUtilizationOfCpu();
+            Double bUtilization = ((PowerHost) b).getUtilizationOfCpu();
+            return bUtilization.compareTo(aUtilization);
+        });
+    }
+
+    public static <T extends HostEntity> void sortByCpuUtilizationDescending(List<T> hostList) {
+
+        hostList.sort(Collections.reverseOrder((a, b) -> {
+            Double aUtilization = ((PowerHost) a).getUtilizationOfCpu();
+            Double bUtilization = ((PowerHost) b).getUtilizationOfCpu();
+            return bUtilization.compareTo(aUtilization);
+        }));
+
+
+    }
 
 }

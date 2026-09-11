@@ -9,13 +9,15 @@
 package org.cloudbus.cloudsim.provisioners;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.core.GuestEntity;
 
 /**
- * RamProvisionerSimple is an extension of RamProvisioner which uses a best-effort policy to
- * allocate memory to a VM.
+ * RamProvisionerSimple is an extension of {@link RamProvisioner} which uses a best-effort policy to
+ * allocate memory to VMs: if there is available ram on the host, it allocates; otherwise, it fails. 
+ * Each host has to have its own instance of a RamProvisioner.
  * 
  * @author Rodrigo N. Calheiros
  * @author Anton Beloglazov
@@ -23,108 +25,92 @@ import org.cloudbus.cloudsim.Vm;
  */
 public class RamProvisionerSimple extends RamProvisioner {
 
-	/** The RAM table. */
+	/** The RAM map, where each key is a VM id and each value
+         * is the amount of RAM allocated to that VM. */
 	private Map<String, Integer> ramTable;
 
 	/**
 	 * Instantiates a new ram provisioner simple.
 	 * 
-	 * @param availableRam the available ram
+	 * @param availableRam The total ram capacity from the host that the provisioner can allocate to VMs. 
 	 */
 	public RamProvisionerSimple(int availableRam) {
 		super(availableRam);
-		setRamTable(new HashMap<String, Integer>());
+		setRamTable(new HashMap<>());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.RamProvisioner#allocateRamForVm(cloudsim.Vm, int)
-	 */
 	@Override
-	public boolean allocateRamForVm(Vm vm, int ram) {
-		int maxRam = vm.getRam();
-
+	public boolean allocateRamForGuest(GuestEntity guest, int ram) {
+		int maxRam = guest.getRam();
+                /* If the requested amount of RAM to be allocated to the VM is greater than
+                the amount of VM is in fact requiring, allocate only the
+                amount defined in the Vm requirements.*/
 		if (ram >= maxRam) {
 			ram = maxRam;
 		}
 
-		deallocateRamForVm(vm);
+		deallocateRamForGuest(guest);
 
 		if (getAvailableRam() >= ram) {
 			setAvailableRam(getAvailableRam() - ram);
-			getRamTable().put(vm.getUid(), ram);
-			vm.setCurrentAllocatedRam(getAllocatedRamForVm(vm));
+			getRamTable().put(guest.getUid(), ram);
+			guest.setCurrentAllocatedRam(getAllocatedRamForGuest(guest));
 			return true;
 		}
 
-		vm.setCurrentAllocatedRam(getAllocatedRamForVm(vm));
+		guest.setCurrentAllocatedRam(getAllocatedRamForGuest(guest));
 
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.RamProvisioner#getAllocatedRamForVm(cloudsim.Vm)
-	 */
 	@Override
-	public int getAllocatedRamForVm(Vm vm) {
-		if (getRamTable().containsKey(vm.getUid())) {
-			return getRamTable().get(vm.getUid());
+	public int getAllocatedRamForGuest(GuestEntity guest) {
+		if (getRamTable().containsKey(guest.getUid())) {
+			return getRamTable().get(guest.getUid());
 		}
 		return 0;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.RamProvisioner#deallocateRamForVm(cloudsim.Vm)
-	 */
 	@Override
-	public void deallocateRamForVm(Vm vm) {
-		if (getRamTable().containsKey(vm.getUid())) {
-			int amountFreed = getRamTable().remove(vm.getUid());
+	public void deallocateRamForGuest(GuestEntity guest) {
+		int allocatedRam = getAllocatedRamForGuest(guest);
+		if (allocatedRam > 0) {
+			int amountFreed = getRamTable().remove(guest.getUid());
 			setAvailableRam(getAvailableRam() + amountFreed);
-			vm.setCurrentAllocatedRam(0);
+			guest.setCurrentAllocatedRam(0);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.RamProvisioner#deallocateRamForVm(cloudsim.Vm)
-	 */
 	@Override
-	public void deallocateRamForAllVms() {
-		super.deallocateRamForAllVms();
+	public void deallocateRamForAllGuests() {
+		super.deallocateRamForAllGuests();
 		getRamTable().clear();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see cloudsim.provisioners.RamProvisioner#isSuitableForVm(cloudsim.Vm, int)
-	 */
 	@Override
-	public boolean isSuitableForVm(Vm vm, int ram) {
-		int allocatedRam = getAllocatedRamForVm(vm);
-		boolean result = allocateRamForVm(vm, ram);
-		deallocateRamForVm(vm);
+	public boolean isSuitableForGuest(GuestEntity guest, int ram) {
+		int allocatedRam = getAllocatedRamForGuest(guest);
+		boolean result = allocateRamForGuest(guest, ram);
+		deallocateRamForGuest(guest);
 		if (allocatedRam > 0) {
-			allocateRamForVm(vm, allocatedRam);
+			allocateRamForGuest(guest, allocatedRam);
 		}
 		return result;
 	}
 
 	/**
-	 * Gets the ram table.
+	 * Gets the map between VMs and allocated ram.
 	 * 
-	 * @return the ram table
+	 * @return the ram map
 	 */
 	protected Map<String, Integer> getRamTable() {
 		return ramTable;
 	}
 
 	/**
-	 * Sets the ram table.
+	 * Sets the map between VMs and allocated ram.
 	 * 
-	 * @param ramTable the ram table
+	 * @param ramTable the ram map
 	 */
 	protected void setRamTable(Map<String, Integer> ramTable) {
 		this.ramTable = ramTable;

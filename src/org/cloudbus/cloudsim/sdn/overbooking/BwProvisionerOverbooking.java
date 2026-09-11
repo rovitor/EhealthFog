@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.cloudbus.cloudsim.Vm;
+import org.cloudbus.cloudsim.core.GuestEntity;
 import org.cloudbus.cloudsim.provisioners.BwProvisioner;
 
 /**
@@ -44,18 +45,18 @@ public class BwProvisionerOverbooking extends BwProvisioner {
 	 * (non-Javadoc)
 	 * @see cloudsim.provisioners.BwProvisioner#allocateBwForVm(cloudsim.Vm, long)
 	 */
-	@Override
-	public boolean allocateBwForVm(Vm vm, long bw) {
-		deallocateBwForVm(vm);
+
+	public boolean allocateBwForGuest(GuestEntity vm, long bw) {
+		deallocateBwForGuest(vm);
 
 		if (getAvailableBw() >= bw) {
 			setAvailableBw(getAvailableBw() - bw);
 			getBwTable().put(vm.getUid(), bw);
-			vm.setCurrentAllocatedBw(getAllocatedBwForVm(vm));
+			vm.setCurrentAllocatedBw(getAllocatedBwForGuest(vm));
 			return true;
 		}
 
-		vm.setCurrentAllocatedBw(getAllocatedBwForVm(vm));
+		vm.setCurrentAllocatedBw(getAllocatedBwForGuest(vm));
 		return false;
 	}
 
@@ -63,8 +64,8 @@ public class BwProvisionerOverbooking extends BwProvisioner {
 	 * (non-Javadoc)
 	 * @see cloudsim.provisioners.BwProvisioner#getAllocatedBwForVm(cloudsim.Vm)
 	 */
-	@Override
-	public long getAllocatedBwForVm(Vm vm) {
+
+	public long getAllocatedBwForGuest(GuestEntity vm) {
 		if (getBwTable().containsKey(vm.getUid())) {
 			return getBwTable().get(vm.getUid());
 		}
@@ -75,8 +76,8 @@ public class BwProvisionerOverbooking extends BwProvisioner {
 	 * (non-Javadoc)
 	 * @see cloudsim.provisioners.BwProvisioner#deallocateBwForVm(cloudsim.Vm)
 	 */
-	@Override
-	public void deallocateBwForVm(Vm vm) {
+
+	public void deallocateBwForGuest(GuestEntity vm) {
 		if (getBwTable().containsKey(vm.getUid())) {
 			long amountFreed = getBwTable().remove(vm.getUid());
 			setAvailableBw(getAvailableBw() + amountFreed);
@@ -89,8 +90,8 @@ public class BwProvisionerOverbooking extends BwProvisioner {
 	 * @see cloudsim.provisioners.BwProvisioner#deallocateBwForVm(cloudsim.Vm)
 	 */
 	@Override
-	public void deallocateBwForAllVms() {
-		super.deallocateBwForAllVms();
+	public void deallocateBwForAllGuests() {
+		super.deallocateBwForAllGuests();
 		
 		setAvailableBw((long) getOverbookedBw(getBw()));	//Overbooking
 		getBwTable().clear();
@@ -102,13 +103,12 @@ public class BwProvisionerOverbooking extends BwProvisioner {
 	 * gridsim.virtualization.power.provisioners.BWProvisioner#isSuitableForVm(gridsim.virtualization
 	 * .power.VM, long)
 	 */
-	@Override
-	public boolean isSuitableForVm(Vm vm, long bw) {
-		long allocatedBw = getAllocatedBwForVm(vm);
-		boolean result = allocateBwForVm(vm, bw);
-		deallocateBwForVm(vm);
+	public boolean isSuitableForGuest(GuestEntity vm, long bw) {
+		long allocatedBw = getAllocatedBwForGuest(vm);
+		boolean result = allocateBwForGuest(vm, bw);
+		deallocateBwForGuest(vm);
 		if (allocatedBw > 0) {
-			allocateBwForVm(vm, allocatedBw);
+			allocateBwForGuest(vm, allocatedBw);
 		}
 		return result;
 	}
