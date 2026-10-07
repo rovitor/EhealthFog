@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "EhealthFog: criticality-aware task offloading for e-health monitoring in iFogSim2"
+version: v1.1.0
+date-released: 2026-10-06
+license: MIT
+repository-code: "https://github.com/rovitor/EhealthFog"
+authors:
+  - family-names: "Torres Tandazo"
+    given-names: "Rommel"
+    affiliation: "Universidad Técnica Particular de Loja"
+    orcid: "https://orcid.org/0000-0003-2313-0118"
+  - family-names: "Cueva Carrión"
+    given-names: "Samanta"
+    affiliation: "Universidad Técnica Particular de Loja"
+    orcid: "https://orcid.org/0000-0003-3862-8816"
+  - family-names: "Loja Mora"
+    given-names: "Nancy"
+    affiliation: "Universidad Técnica de Machala"
+    orcid: "https://orcid.org/0000-0002-5583-4278"
+references:
+  - type: article
+    title: "iFogSim2: An Extended iFogSim Simulator for Mobility, Clustering, and Microservice Management in Edge and Fog Computing Environments"
+    authors:
+      - family-names: Mahmud
+        given-names: Redowan
+      - family-names: Pallewatta
+        given-names: Samodha
+      - family-names: Goudarzi
+        given-names: Mohammad
+      - family-names: Buyya
+        given-names: Rajkumar
+    journal: "Journal of Systems and Software"
+    volume: 190
+    start: 111351
+    year: 2022
+    doi: "10.1016/j.jss.2022.111351"

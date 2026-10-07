@@ -6,3 +6,14 @@ bin/
 out/
 *.iml
 .idea/
+
+# E-Health revision (oct 2026)
+build/
+results/E*/
+results/test/
+pilot*/
+diag/
+.DS_Store
+__pycache__/
+.pytest_cache/
+revision/limpieza_*.txt

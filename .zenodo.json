@@ -1,0 +1,17 @@
+{
+  "title": "EhealthFog: criticality-aware task offloading for e-health monitoring in iFogSim2",
+  "upload_type": "software",
+  "version": "v1.1.0",
+  "description": "<p>Extension of the iFogSim2 simulator that evaluates a criticality-aware offloading policy (<i>CriticalityAware</i>) for hospital e-health monitoring. Each Edge gateway forwards a critical tuple to the Fog node only when its own utilisation over the last 100 ms exceeds a threshold and the utilisation advertised by the Fog node is below a second threshold; otherwise the tuple is processed locally.</p><p>The package contains the per-tuple forwarding implementation (fair processor sharing, exact completion times, unicast return of results, per-tuple latency, transmitted bytes and busy-time energy), the scenario with three policies (Edge-local, Always-Fog, CriticalityAware), the scripts of the experimental campaign (380 runs, 10 seeds per configuration) and the per-run summary of results used in the revised manuscript submitted to <i>Sensors</i>.</p><p>Version v1.1.0 replaces v1.0.0, which contained two configuration errors (the baseline placement policy was created before the controller and placed no modules; the analysis module was installed on only one gateway). Results obtained with v1.0.0 must not be used.</p>",
+  "creators": [
+    {"name": "Torres Tandazo, Rommel", "affiliation": "Universidad Técnica Particular de Loja", "orcid": "0000-0003-2313-0118"},
+    {"name": "Cueva Carrión, Samanta", "affiliation": "Universidad Técnica Particular de Loja", "orcid": "0000-0003-3862-8816"},
+    {"name": "Loja Mora, Nancy", "affiliation": "Universidad Técnica de Machala", "orcid": "0000-0002-5583-4278"}
+  ],
+  "license": "MIT",
+  "keywords": ["edge computing", "fog computing", "e-health", "Internet of Medical Things", "task offloading", "criticality-aware scheduling", "iFogSim"],
+  "related_identifiers": [
+    {"identifier": "https://github.com/Cloudslab/iFogSim/tree/5f68d3947e450d8d2b4af42670be819206be68c9", "relation": "isDerivedFrom", "resource_type": "software"},
+    {"identifier": "10.1016/j.jss.2022.111351", "relation": "references", "resource_type": "publication-article"}
+  ]
+}
