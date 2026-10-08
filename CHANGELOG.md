@@ -1,5 +1,19 @@
 # Changelog of the E-Health extension
 
+## v1.1.1 (October 2026) - Fog threshold sensitivity
+
+### Added
+- Experiment E5: sensitivity of `CRITICALITY_AWARE` to the Fog threshold (`fogThreshold` 0.6, 0.7, 0.8, 0.9, 1.0 and
+  2.0 = no Fog guard) at loads 1.2 and 1.4, 10 seeds (120 runs). The campaign now has 500 runs.
+- `make_figures.py` writes Table 7 of the revised manuscript (`table_e5.tex`) and the E5 rows of
+  `summary_by_config.csv`.
+
+### Changed
+- `run_experiments.py`: run names include `_ft<value>` when the Fog threshold differs from 0.8 (names of E1-E4 are
+  unchanged, so existing results are reused).
+- `revision/results_summary.csv` and `revision/latency_hist.csv` include the 120 runs of E5. The rows of E1-E4 are
+  unchanged; E5 with `fogThreshold=0.8` reproduces the corresponding E2 runs exactly.
+
 ## v1.1.0 (October 2026) - version of the revised manuscript
 
 ### Fixed

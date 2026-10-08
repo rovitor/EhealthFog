@@ -1,5 +1,5 @@
 #!/bin/bash
-# Campana completa E1-E4 (380 corridas). Reanudable: si se interrumpe, vuelva a ejecutarlo y sigue donde quedo.
+# Campana completa E1-E5 (500 corridas). Reanudable: si se interrumpe, vuelva a ejecutarlo y sigue donde quedo.
 # Uso (desde la raiz del proyecto iFogSim):  bash run_campaign.sh
 set -e
 cd "$(dirname "$0")"

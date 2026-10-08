@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Resume las 380 corridas en un solo archivo (una fila por corrida). Solo usa la biblioteca estandar.
-Uso (desde la raiz del proyecto iFogSim):  python3 summarize_runs.py
-Salida: revision/results_summary.csv  (y revision/latency_hist.csv para las figuras de distribucion)
+"""Summarises all runs in results/E*/ (500 runs, E1-E5) in one file, one row per run. Standard library only.
+Usage (from the iFogSim root):  python3 src/org/fog/test/perfeval/ehealth/scripts/summarize_runs.py
+Output: revision/results_summary.csv and revision/latency_hist.csv
 """
 import csv, glob, os, math
 
@@ -64,4 +64,4 @@ with open("revision/results_summary.csv", "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=keys); w.writeheader(); w.writerows(rows)
 with open("revision/latency_hist.csv", "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=list(hist[0].keys())); w.writeheader(); w.writerows(hist)
-print(f"{len(rows)} corridas resumidas -> revision/results_summary.csv y revision/latency_hist.csv")
+print(f"{len(rows)} runs summarised -> revision/results_summary.csv and revision/latency_hist.csv")

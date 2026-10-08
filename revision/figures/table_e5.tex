@@ -1,0 +1,24 @@
+\begin{table}[H]
+\caption{Sensitivity of \textit{CriticalityAware} to the Fog threshold $\theta_F$ ($\theta=0.7$, 50 patients, $p=5\%$). Latencies in ms; Fwd.: critical tuples forwarded to the Fog node; E$\to$F: Edge-to-Fog traffic. Critical mean: mean $\pm$ standard deviation over 10 replications; other columns: mean over 10 replications.\label{tab:e5}}
+\footnotesize
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\begin{tabularx}{\textwidth}{cc>{\centering\arraybackslash}p{2.3cm}CCCCC}
+\toprule
+\textbf{Load} & \textbf{$\theta_F$} & \textbf{Critical mean} & \textbf{Critical p95} & \textbf{Normal mean} & \textbf{Fwd. (\%)} & \textbf{E$\to$F (MB/s)} & \textbf{Fog util.} \\
+\midrule
+1.2 & 0.6 & 11.59 $\pm$ 0.08 & 17.39 & 10.68 & 59 & 10.9 & 0.53 \\
+ & 0.7 & 11.57 $\pm$ 0.06 & 17.33 & 10.47 & 64 & 11.7 & 0.58 \\
+ & 0.8 & 11.54 $\pm$ 0.07 & 17.15 & 10.41 & 66 & 12.0 & 0.59 \\
+ & 0.9 & 11.56 $\pm$ 0.08 & 17.20 & 10.41 & 66 & 12.0 & 0.59 \\
+ & 1.0 & 11.56 $\pm$ 0.09 & 17.24 & 10.41 & 66 & 12.0 & 0.59 \\
+ & $\infty$ (no guard) & 11.56 $\pm$ 0.09 & 17.24 & 10.41 & 66 & 12.0 & 0.59 \\
+\midrule
+1.4 & 0.6 & 15.52 $\pm$ 0.42 & 27.59 & 23.21 & 56 & 12.0 & 0.59 \\
+ & 0.7 & 15.79 $\pm$ 0.61 & 28.23 & 21.55 & 64 & 13.6 & 0.67 \\
+ & 0.8 & 16.49 $\pm$ 0.58 & 29.97 & 20.28 & 72 & 15.3 & 0.75 \\
+ & 0.9 & 17.54 $\pm$ 0.60 & 32.55 & 19.23 & 80 & 16.9 & 0.83 \\
+ & 1.0 & 19.64 $\pm$ 0.98 & 38.37 & 18.29 & 86 & 18.2 & 0.90 \\
+ & $\infty$ (no guard) & 40.54 $\pm$ 19.11 & 105 & 17.67 & 91 & 19.2 & 0.95 \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Figures and tables for the revised manuscript, from revision/results_summary.csv (10 seeds per point)."""
+"""Figures and tables for the revised manuscript, from revision/results_summary.csv (10 seeds per point).
+Usage: python3 make_figures.py revision/results_summary.csv revision/figures"""
 import sys, os
 import numpy as np, pandas as pd
 import matplotlib; matplotlib.use("Agg")
@@ -119,6 +120,26 @@ tex = ("\\begin{table}[H]\n\\caption{Results for the same critical workload unde
        + "\n".join(rows) + "\n\\bottomrule\n\\end{tabularx}\n\\end{table}\n")
 open(f"{OUT}/table_e1.tex", "w").write(tex)
 
+# Table - E5 (sensitivity to the Fog threshold theta_F, CriticalityAware, loads 1.2 and 1.4) as LaTeX
+e5 = d[d.exp == "E5"]
+if len(e5):
+    rows = []
+    for ld in sorted(e5.load.unique()):
+        for j, ft in enumerate(sorted(e5.fog_threshold.unique())):
+            s = e5[(e5.load == ld) & (e5.fog_threshold == ft)]
+            lab = f"{ld:.1f}" if j == 0 else ""
+            ftl = "$\\infty$ (no guard)" if ft > 1.5 else f"{ft:.1f}"
+            rows.append(f"{lab} & {ftl} & {ms(s.crit_mean)} & {m1(s.crit_p95)} & {m1(s.norm_mean)} & "
+                        f"{100*s.offload_frac.mean():.0f} & {s.edge_to_fog_Bps.mean()/1e6:.1f} & {s.fog_util.mean():.2f} \\\\")
+        rows.append("\\midrule")
+    rows = rows[:-1]
+    tex = ("\\begin{table}[H]\n\\caption{Sensitivity of \\textit{CriticalityAware} to the Fog threshold $\\theta_F$ ($\\theta=0.7$, 50 patients, $p=5\\%$). "
+           "Latencies in ms; Fwd.: critical tuples forwarded to the Fog node; E$\\to$F: Edge-to-Fog traffic. Critical mean: mean $\\pm$ standard deviation over 10 replications; other columns: mean over 10 replications.\\label{tab:e5}}\n"
+           "\\footnotesize\n\\newcolumntype{C}{>{\\centering\\arraybackslash}X}\n\\begin{tabularx}{\\textwidth}{cc>{\\centering\\arraybackslash}p{2.3cm}CCCCC}\n\\toprule\n"
+           "\\textbf{Load} & \\textbf{$\\theta_F$} & \\textbf{Critical mean} & \\textbf{Critical p95} & \\textbf{Normal mean} & \\textbf{Fwd. (\\%)} & \\textbf{E$\\to$F (MB/s)} & \\textbf{Fog util.} \\\\\n\\midrule\n"
+           + "\n".join(rows) + "\n\\bottomrule\n\\end{tabularx}\n\\end{table}\n")
+    open(f"{OUT}/table_e5.tex", "w").write(tex)
+
 # Aggregated table for all experiments (CSV, for the text and the response letters)
 cols = ["crit_mean", "crit_p95", "norm_mean", "norm_p95", "offload_frac", "edge_util_mean", "fog_util", "edge_to_fog_Bps", "edge_energy_J_mean", "fog_energy_J"]
 out = []
@@ -126,5 +147,10 @@ for exp, key in [("E1", "anomaly"), ("E2", "load"), ("E3", "threshold"), ("E4", 
     s = d[d.exp == exp].groupby([key, "policy"])[cols].agg(["mean", "std"])
     s.columns = [f"{a}_{b}" for a, b in s.columns]; s = s.reset_index().rename(columns={key: "level"}); s.insert(0, "exp", exp); s.insert(1, "factor", key)
     out.append(s)
+if len(e5):
+    s = e5.groupby(["load", "fog_threshold", "policy"])[cols].agg(["mean", "std"])
+    s.columns = [f"{a}_{b}" for a, b in s.columns]; s = s.reset_index()
+    s.insert(0, "level", "load=" + s.pop("load").astype(str) + ";fog_threshold=" + s.pop("fog_threshold").astype(str))
+    s.insert(0, "factor", "load,fog_threshold"); s.insert(0, "exp", "E5"); out.append(s)
 pd.concat(out).round(4).to_csv(f"{OUT}/summary_by_config.csv", index=False)
 print("ok")

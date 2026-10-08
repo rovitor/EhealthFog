@@ -1,0 +1,22 @@
+\begin{table}[H]
+\caption{Results for the same critical workload under the three policies (load 1.0, 50 patients). Latencies in ms; Fwd.: critical tuples forwarded to the Fog node; E$\to$F: Edge-to-Fog traffic. Critical mean: mean $\pm$ standard deviation over 10 replications; other columns: mean over 10 replications.\label{tab:e1}}
+\footnotesize
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\begin{tabularx}{\textwidth}{cl>{\centering\arraybackslash}p{2.3cm}CCCCC}
+\toprule
+\textbf{$p$} & \textbf{Policy} & \textbf{Critical mean} & \textbf{Critical p95} & \textbf{Normal mean} & \textbf{Fwd. (\%)} & \textbf{E$\to$F (MB/s)} & \textbf{Fog util.} \\
+\midrule
+1\% & Edge-local & 10.25 $\pm$ 0.05 & 14.05 & 6.77 & 0 & 0.15 & 0.00 \\
+ & Always-Fog & 9.56 $\pm$ 0.02 & 11.34 & 6.44 & 100 & 3.14 & 0.15 \\
+ & CriticalityAware & 10.06 $\pm$ 0.05 & 13.59 & 6.68 & 21 & 0.79 & 0.03 \\
+\midrule
+5\% & Edge-local & 11.25 $\pm$ 0.07 & 18.99 & 8.23 & 0 & 0.15 & 0.00 \\
+ & Always-Fog & 12.34 $\pm$ 0.33 & 19.02 & 6.45 & 100 & 15.10 & 0.75 \\
+ & CriticalityAware & 10.65 $\pm$ 0.04 & 16.92 & 7.56 & 30 & 4.62 & 0.22 \\
+\midrule
+10\% & Edge-local & 12.89 $\pm$ 0.16 & 24.86 & 10.79 & 0 & 0.15 & 0.00 \\
+ & Always-Fog & 3581 $\pm$ 152 & 5581 & 6.44 & 100 & 29.94 & 0.99 \\
+ & CriticalityAware & 11.85 $\pm$ 0.07 & 20.46 & 8.56 & 38 & 11.61 & 0.57 \\
+\bottomrule
+\end{tabularx}
+\end{table}

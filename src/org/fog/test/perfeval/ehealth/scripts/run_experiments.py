@@ -3,7 +3,7 @@
 Runs the revised experimental campaign (one JVM per run, in parallel).
 
 Usage (from the iFogSim project root, after compiling):
-    python3 run_experiments.py --cp "build:jars/*:jars/commons-math3-3.5/*" --jobs 4 --sets E1 E2 E3 E4
+    python3 run_experiments.py --cp "build:jars/*:jars/commons-math3-3.5/*" --jobs 4 --sets E1 E2 E3 E4 E5
     python3 run_experiments.py --dry-run          # only prints the commands
 
 Every run writes results/<set>/<name>_{critical,normal,decisions,devices,run}.csv
@@ -34,19 +34,23 @@ def experiments():
     # E4 - heterogeneous gateways and scale (R3 heterogeneity, "50 to 100 patients")
     for pol, n, s in itertools.product(POLICIES, [25, 50, 75, 100], SEEDS):
         runs.append(("E4", dict(BASE, policy=pol, patients=n, edgeMips="hetero", seed=s)))
+    # E5 - Fog threshold sensitivity near saturation (2.0 = no Fog guard, since utilisation never exceeds 1)
+    for ft, ld, s in itertools.product([0.6, 0.7, 0.8, 0.9, 1.0, 2.0], [1.2, 1.4], SEEDS):
+        runs.append(("E5", dict(BASE, policy="CRITICALITY_AWARE", fogThreshold=ft, load=ld, seed=s)))
     return runs
 
 
 def name_of(cfg):
+    ft = "" if cfg["fogThreshold"] == 0.8 else f"_ft{cfg['fogThreshold']}"   # E1-E4 names unchanged
     return (f"{cfg['policy']}_n{cfg['patients']}_m{cfg['edgeMips']}_p{cfg['anomaly']}"
-            f"_l{cfg['load']}_th{cfg['threshold']}_s{cfg['seed']}")
+            f"_l{cfg['load']}_th{cfg['threshold']}{ft}_s{cfg['seed']}")
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cp", default="build:jars/*:jars/commons-math3-3.5/*")
     ap.add_argument("--jobs", type=int, default=max(1, (os.cpu_count() or 2) - 1))
-    ap.add_argument("--sets", nargs="*", default=["E1", "E2", "E3", "E4"])
+    ap.add_argument("--sets", nargs="*", default=["E1", "E2", "E3", "E4", "E5"])
     ap.add_argument("--xmx", default="2g")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--timeout", type=int, default=300, help="seconds per run before it is killed")
