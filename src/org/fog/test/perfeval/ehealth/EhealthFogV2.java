@@ -57,6 +57,11 @@ public class EhealthFogV2 {
     static final String APP = "App_Salud";
 
     // ---------------- workload parameters (Table of parameters in the manuscript) -------------
+    // Units. The simulation clock is in milliseconds (link latencies 1, 2 and 100 ms; simTime 10,000 ms) and
+    // iFogSim computes execution time = length / MIPS in clock units. With capacities in MIPS (10^3 instructions
+    // per ms), the lengths below are therefore in THOUSANDS of instructions (kI): CRITICAL_MI = 10,000 kI = 10 MI,
+    // i.e. 10,000 / 3000 = 3.33 ms on an idle 3000-MIPS gateway and 1 ms on the 10,000-MIPS Fog node.
+    // Tuple sizes are in bytes and bandwidths in bytes per ms (10,000 bytes/ms = 10 MB/s).
     static final double ECG_MEAN_MS = 5.0;       // mean inter-arrival at load = 1
     static final double OXI_MEAN_MS = 10.0;
     static final double SENSOR_MI = 1000, SENSOR_BYTES = 500;
@@ -81,7 +86,8 @@ public class EhealthFogV2 {
         double anomaly = Double.parseDouble(a.getOrDefault("anomaly", "0.05"));
         double load = Double.parseDouble(a.getOrDefault("load", "1.0"));
         long seed = Long.parseLong(a.getOrDefault("seed", "1"));
-        double simTime = Double.parseDouble(a.getOrDefault("simTime", "10000"));
+        double simTime = Double.parseDouble(a.getOrDefault("simTime", "10000"));        // end of sample generation
+        double drainCap = Double.parseDouble(a.getOrDefault("drainCap", "120000"));    // safety cap for the drain
         double warmup = Double.parseDouble(a.getOrDefault("warmup", "1000"));
         String out = a.getOrDefault("out", "results/run");
         EHealthController.HEARTBEAT_MS = Double.parseDouble(a.getOrDefault("heartbeat", "1000"));
@@ -94,7 +100,12 @@ public class EhealthFogV2 {
         double fogThreshold = Double.parseDouble(a.getOrDefault("fogThreshold", "0.8"));
         CriticalityAwareFogDevice.FOG_THRESHOLD = fogThreshold;
         Metrics.WARMUP_MS = warmup;
-        Config.MAX_SIMULATION_TIME = (int) simTime;
+        Metrics.GEN_END_MS = simTime;
+        Metrics.ANOMALY = anomaly;
+        Metrics.LABEL_SEED = seed;
+        Metrics.HISTORY_FRACTION = HISTORY_SEL;
+        // sensors stop at simTime; the run drains until every sample is processed (cap: simTime + drainCap)
+        Config.MAX_SIMULATION_TIME = (int) (simTime + drainCap);
 
         Log.disable();
         CloudSim.init(1, Calendar.getInstance(), false);
@@ -124,11 +135,11 @@ public class EhealthFogV2 {
             devices.add(edge);
             // Tier 1 - sensors and actuator
             Sensor ecg = new TrackedSensor("Sensor_ECG_" + i, "ECG", broker.getId(), APP,
-                    new SeededExponentialDistribution(ECG_MEAN_MS / load, seed * 100003L + 2L * i), i);
+                    new SeededExponentialDistribution(ECG_MEAN_MS / load, seed * 100003L + 2L * i), i, 0);
             ecg.setGatewayDeviceId(edge.getId());
             ecg.setLatency(1.0);
             Sensor oxi = new TrackedSensor("Sensor_Oximetro_" + i, "OXIMETRO", broker.getId(), APP,
-                    new SeededExponentialDistribution(OXI_MEAN_MS / load, seed * 100003L + 2L * i + 1), i);
+                    new SeededExponentialDistribution(OXI_MEAN_MS / load, seed * 100003L + 2L * i + 1), i, 1);
             oxi.setGatewayDeviceId(edge.getId());
             oxi.setLatency(1.0);
             Actuator alarm = new Actuator("Alarma_" + i, broker.getId(), APP, "ALARMA_EMERGENCIA");
@@ -142,8 +153,8 @@ public class EhealthFogV2 {
 
         // Controller FIRST: its constructor links parents and children (getChildrenIds).
         String runInfo = String.format(java.util.Locale.ROOT,
-                "policy,%s%nthreshold,%.3f%nwindow_ms,%.1f%npatients,%d%nedge_mips,%s%nanomaly,%.4f%nload,%.3f%nseed,%d%nsim_ms,%.0f%nwarmup_ms,%.0f",
-                policy, threshold, window, patients, edgeMips, anomaly, load, seed, simTime, warmup)
+                "policy,%s%nthreshold,%.3f%nwindow_ms,%.1f%npatients,%d%nedge_mips,%s%nanomaly,%.4f%nload,%.3f%nseed,%d%nsim_ms,%.0f%nwarmup_ms,%.0f%ndrain_cap_ms,%.0f%nversion,1.2.0",
+                policy, threshold, window, patients, edgeMips, anomaly, load, seed, simTime, warmup, drainCap)
                 + String.format(java.util.Locale.ROOT, "%ncritical_mi,%.0f%nfog_mips,%d%nfog_threshold,%.2f", CRITICAL_MI, fogMips, fogThreshold);
         Controller controller = new EHealthController("master-controller", devices, sensors, actuators, out, runInfo);
 
@@ -206,12 +217,14 @@ public class EhealthFogV2 {
 
         app.addTupleMapping("client", "ECG", "RAW_DATA", new FractionalSelectivity(1.0));
         app.addTupleMapping("client", "OXIMETRO", "RAW_DATA", new FractionalSelectivity(1.0));
-        // every window gets routine processing; a fraction p is flagged as anomalous (criticality label)
+        // every window gets routine processing; a fraction p is flagged as anomalous (criticality label).
+        // v1.2.0: the label of each sample is decided at emission (Metrics.newSample), so the three policies
+        // label exactly the same samples; LabelSelectivity only reads it.
         app.addTupleMapping("Filtering_Module", "RAW_DATA", "NORMAL", new FractionalSelectivity(1.0));
-        app.addTupleMapping("Filtering_Module", "RAW_DATA", "CRITICAL", new SeededBernoulliSelectivity(anomaly, seed * 7919L + 1));
+        app.addTupleMapping("Filtering_Module", "RAW_DATA", "CRITICAL", new LabelSelectivity(LabelSelectivity.Kind.CRITICAL, anomaly));
         app.addTupleMapping("Analysis_Module", "CRITICAL", "RESPONSE", new FractionalSelectivity(1.0));
         app.addTupleMapping("client", "RESPONSE", "ALARM", new FractionalSelectivity(1.0));
-        app.addTupleMapping("Routine_Module", "NORMAL", "HISTORY", new SeededBernoulliSelectivity(HISTORY_SEL, seed * 7919L + 2));
+        app.addTupleMapping("Routine_Module", "NORMAL", "HISTORY", new LabelSelectivity(LabelSelectivity.Kind.SUMMARY, HISTORY_SEL));
 
         app.setLoops(new ArrayList<AppLoop>()); // latency is measured by Metrics, not by iFogSim loops
         return app;

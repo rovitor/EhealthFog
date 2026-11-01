@@ -221,7 +221,10 @@ public class CriticalityAwareFogDevice extends FogDevice {
                         Metrics.normalCompleted(tuple.getActualTupleId(), CloudSim.clock());
                     }
                     Application application = getApplicationMap().get(tuple.getAppId());
+                    // per-sample labels (LabelSelectivity) are read for the sample of this tuple
+                    Metrics.currentSample = tuple.getActualTupleId();
                     List<Tuple> results = application.getResultantTuples(tuple.getDestModuleName(), tuple, getId(), vm.getId());
+                    Metrics.currentSample = -1;
                     for (Tuple res : results) {
                         res.setModuleCopyMap(new HashMap<String, Integer>(tuple.getModuleCopyMap()));
                         res.getModuleCopyMap().put(((AppModule) vm).getName(), vm.getId());
@@ -281,9 +284,14 @@ public class CriticalityAwareFogDevice extends FogDevice {
     }
 
     public double energy(double simEnd) {
+        return energy(0.0, simEnd, 0.0, busyTime(simEnd));
+    }
+
+    /** Energy (W x ms) in [from, to] given the cumulative busy time at both ends (measurement window, v1.2.0). */
+    public double energy(double from, double to, double busyFrom, double busyTo) {
         double pIdle = getHost().getPowerModel().getPower(0.0);
         double pBusy = getHost().getPowerModel().getPower(1.0);
-        return pIdle * simEnd + (pBusy - pIdle) * busyTime(simEnd);
+        return pIdle * (to - from) + (pBusy - pIdle) * (busyTo - busyFrom);
     }
 
     /** Diagnostic: number of tuples queued in each module of this device. */

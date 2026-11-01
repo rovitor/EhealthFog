@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "EhealthFog: criticality-aware task offloading for e-health monitoring in iFogSim2"
-version: v1.1.1
-date-released: 2026-10-08
+version: v1.2.0
+date-released: 2026-10-27
 license: MIT
 repository-code: "https://github.com/rovitor/EhealthFog"
 authors:

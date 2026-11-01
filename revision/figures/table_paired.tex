@@ -1,0 +1,21 @@
+\begin{table}[H]
+\caption{Paired difference in the mean latency of critical tuples between \policy{} and each reference policy (\policy{} minus reference, ms): mean over the ten replications and 95\% confidence interval. Negative values favor \policy{}. $^{\dagger}$ The interval includes zero.\label{tab:paired}}
+\small
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\begin{tabularx}{\textwidth}{lCC}
+\toprule
+\textbf{Scenario} & \textbf{vs. Edge-local} & \textbf{vs. Always-Fog} \\
+\midrule
+Load 0.8 & $-$0.07 [$-$0.08, $-$0.07] & $-$0.74 [$-$0.81, $-$0.67] \\
+Load 1.0 ($p=5\%$, base) & $-$0.56 [$-$0.59, $-$0.54] & $-$1.61 [$-$1.71, $-$1.50] \\
+Load 1.2 & $-$1.11 [$-$1.17, $-$1.05] & $-$6.95 [$-$7.47, $-$6.43] \\
+Load 1.4 & 1.95 [1.68, 2.22] & $-$549 [$-$643, $-$454] \\
+$p=1\%$ & $-$0.21 [$-$0.24, $-$0.17] & 0.46 [0.40, 0.53] \\
+$p=10\%$ & $-$1.05 [$-$1.13, $-$0.97] & $-$5,449 [$-$5,596, $-$5,302] \\
+25 patients (het.) & $-$1.39 [$-$1.47, $-$1.30] & $-$0.03 [$-$0.10, 0.05]$^{\dagger}$ \\
+50 patients (het.) & $-$1.28 [$-$1.33, $-$1.24] & $-$2.28 [$-$2.38, $-$2.19] \\
+75 patients (het.) & $-$1.18 [$-$1.22, $-$1.14] & $-$1,353 [$-$1,419, $-$1,286] \\
+100 patients (het.) & $-$1.06 [$-$1.11, $-$1.02] & $-$5,393 [$-$5,480, $-$5,306] \\
+\bottomrule
+\end{tabularx}
+\end{table}

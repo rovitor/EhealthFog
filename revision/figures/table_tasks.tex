@@ -1,0 +1,22 @@
+\begin{table}[H]
+\caption{Completion of critical tuples (load 1.0, 50 patients; mean over 10 replications). Generated: critical tuples generated in the measurement interval; Done: percentage completed by the end of sample generation; Pending: tuples still pending at that time; Drain: time needed after the end of generation to complete them; $\leq$20~ms, $\leq$50~ms: percentage of the generated critical tuples whose result arrived within 20 and 50~ms. After the drain, every generated tuple was completed in every run.\label{tab:tasks}}
+\footnotesize
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\begin{tabularx}{\textwidth}{clCCCCCC}
+\toprule
+\textbf{$p$} & \textbf{Policy} & \textbf{Generated} & \textbf{Done (\%)} & \textbf{Pending} & \textbf{Drain (ms)} & \textbf{$\leq$20~ms (\%)} & \textbf{$\leq$50~ms (\%)} \\
+\midrule
+1\% & Edge-local & 1,334 & 99.9 & 1 & 11 & 99.5 & 100.0 \\
+ & Always-Fog & 1,334 & 99.9 & 1 & 11 & 100.0 & 100.0 \\
+ & CriticalityAware & 1,334 & 99.9 & 1 & 11 & 99.7 & 100.0 \\
+\midrule
+5\% & Edge-local & 6,729 & 99.9 & 8 & 14 & 96.3 & 100.0 \\
+ & Always-Fog & 6,729 & 99.9 & 9 & 11 & 96.3 & 100.0 \\
+ & CriticalityAware & 6,729 & 99.9 & 8 & 13 & 97.8 & 100.0 \\
+\midrule
+10\% & Edge-local & 13,483 & 99.9 & 17 & 19 & 89.0 & 99.9 \\
+ & Always-Fog & 13,483 & 35.4 & 8,715 & 4,982 & 0.0 & 0.0 \\
+ & CriticalityAware & 13,483 & 99.9 & 16 & 16 & 94.2 & 100.0 \\
+\bottomrule
+\end{tabularx}
+\end{table}

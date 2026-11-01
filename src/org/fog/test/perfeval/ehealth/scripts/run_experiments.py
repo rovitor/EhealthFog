@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 POLICIES = ["LOCAL", "ALWAYS_FOG", "CRITICALITY_AWARE"]
 SEEDS = range(1, 11)          # 10 independent replications
 # Calibrated on 2 Oct 2026 (pilot + calibration sweep): critical analysis = 10,000 MI,
-# Fog accepts offloads only while U_F < 0.8, 10 s simulated + 1 s warm-up.
+# Fog accepts offloads only while U_F < 0.8; samples generated for 10 s (first 1 s = warm-up), then drained (v1.2.0).
 BASE = dict(threshold=0.7, fogThreshold=0.8, window=100, patients=50, edgeMips="3000",
             criticalMI=10000, fogMips=10000, anomaly=0.05, load=1.0, simTime=10000, warmup=1000)
 
@@ -53,14 +53,20 @@ def main():
     ap.add_argument("--sets", nargs="*", default=["E1", "E2", "E3", "E4", "E5"])
     ap.add_argument("--xmx", default="2g")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--timeout", type=int, default=300, help="seconds per run before it is killed")
+    ap.add_argument("--timeout", type=int, default=3600, help="seconds per run before it is killed")
     a = ap.parse_args()
 
-    todo = []
+    # Configurations shared by several sets (e.g. the base configuration in E1 and E2) are run once: each run is
+    # fully determined by its configuration and seed, so the other sets receive a copy of its output files.
+    todo, first_out, copies = [], {}, []
     for exp, cfg in experiments():
         if exp not in a.sets:
             continue
         out = os.path.join("results", exp, name_of(cfg))
+        if name_of(cfg) in first_out:
+            copies.append((first_out[name_of(cfg)], out))
+            continue
+        first_out[name_of(cfg)] = out
         if os.path.exists(out + "_run.csv"):
             continue
         args = [f"{k}={v}" for k, v in cfg.items()] + [f"out={out}"]
@@ -86,6 +92,14 @@ def main():
             done += 1
             status = "ok" if rc == 0 else f"FAIL rc={rc} {err}"
             print(f"[{done}/{len(todo)}] {out} {status}", file=sys.stderr)
+
+    import shutil
+    for src, dst in copies:
+        if os.path.exists(src + "_run.csv") and not os.path.exists(dst + "_run.csv"):
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            for suf in ["_critical.csv", "_normal.csv", "_decisions.csv", "_labels.csv", "_devices.csv", "_run.csv"]:
+                shutil.copyfile(src + suf, dst + suf)
+    print(f"{len(copies)} shared configurations copied from their first run", file=sys.stderr)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """Summarises all runs in results/E*/ (500 runs, E1-E5) in one file, one row per run. Standard library only.
+v1.2.0: all metrics refer to the measurement window [warm-up, end of sample generation]; latencies include every
+generated sample (the runs drain); deadline metrics count undelivered critical tuples as misses.
 Usage (from the iFogSim root):  python3 src/org/fog/test/perfeval/ehealth/scripts/summarize_runs.py
 Output: revision/results_summary.csv and revision/latency_hist.csv
 """
@@ -17,6 +19,7 @@ def stats(vals, prefix):
             f"{prefix}_max": (v[-1] if n else float('nan'))}
 
 BINS = [0, 2, 4, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200, 300, 500, 1000, 1e9]
+DEADLINES_MS = [20, 50, 100]
 rows, hist = [], []
 for runf in sorted(glob.glob("results/E*/*_run.csv")):
     p = runf[:-len("_run.csv")]; exp = runf.split(os.sep)[1]
@@ -30,7 +33,7 @@ for runf in sorted(glob.glob("results/E*/*_run.csv")):
         by_mips.setdefault(mips_of.get(int(r["patient"]), "?"), []).append(x)
     norm = [float(r["latency_ms"]) for r in csv.DictReader(open(p + "_normal.csv"))]
     edges = [d for d in dev if d["role"] == "EDGE"]; fog = [d for d in dev if d["role"] == "FOG"][0]
-    T = float(info["sim_ms"]) / 1000.0
+    T = float(info["measure_window_ms"]) / 1000.0   # seconds of the measurement window
     row = {"exp": exp, "file": os.path.basename(p)}; row.update(info)
     row.update(stats(crit, "crit")); row.update(stats(norm, "norm"))
     row["crit_offloaded_mean"] = sum(crit_off) / len(crit_off) if crit_off else float('nan')
@@ -42,6 +45,13 @@ for runf in sorted(glob.glob("results/E*/*_run.csv")):
     row["fog_util"] = float(fog["utilization"])
     row["edge_energy_J_mean"] = sum(float(d["energy_Wms"]) for d in edges) / len(edges) / 1000.0
     row["fog_energy_J"] = float(fog["energy_Wms"]) / 1000.0
+    row["edge_power_W_mean"] = row["edge_energy_J_mean"] / T
+    row["fog_power_W"] = row["fog_energy_J"] / T
+    gen = int(info["crit_generated"])
+    for D in DEADLINES_MS:   # fraction of generated critical tuples delivered within D ms (pending = miss)
+        row[f"crit_within_{D}ms"] = sum(1 for x in crit if x <= D) / gen if gen else float('nan')
+    row["crit_done_by_gen_end_frac"] = int(info["crit_done_by_gen_end"]) / gen if gen else float('nan')
+    row["drain_ms"] = float(info["end_ms"]) - float(info["sim_ms"])
     row["edge_to_fog_Bps"] = float(info["network_bytes_edge_to_fog"]) / T
     row["total_Bps"] = float(info["network_bytes_total"]) / T
     for m, v in sorted(by_mips.items()):
